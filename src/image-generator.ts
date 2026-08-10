@@ -108,7 +108,7 @@ export class ImageGenerator {
           body: JSON.stringify({
             prompt: `${prompt}, digital painting, atmospheric, moody lighting`,
             num_steps: 4,
-          },
+          }),
         }
       );
 
