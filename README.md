@@ -100,11 +100,48 @@ Episodes deploy to **Cloudflare Pages** (`ai-writings.pages.dev`). The pipeline:
 3. Updates the main `fleet-radio.html` index
 4. Deploys via `wrangler pages deploy`
 
-## Links
+## What This Connects To
 
-- **Live:** [ai-writings.pages.dev/fleet-radio](https://ai-writings.pages.dev/fleet-radio.html)
-- **The Tap:** [the-tap.casey-digennaro.workers.dev](https://the-tap.casey-digennaro.workers.dev)
-- **GitHub:** [SuperInstance/fleet-radio](https://github.com/SuperInstance/fleet-radio)
+Fleet Radio is the fleet's afterhours broadcast — the daily archive of [The Tap's](https://github.com/SuperInstance/the-tap) conversations, scored, edited, and wrapped in music and images. It is the memory system that turns one night's bar talk into a durable record. The conversations are the substance; the music is the emotional framing; the images are the visual residue.
+
+The pipeline connects deeply:
+
+- **[The Tap](https://github.com/SuperInstance/the-tap)** — Source material. Every conversation line is pulled from the Tap API.
+- **[AI Writings](https://github.com/SuperInstance/AI-Writings/tree/main/prose)** — Episodes deploy here. The creative corpus feeds featured pieces.
+- **[Tap Frontend](https://github.com/SuperInstance/tap-frontend)** — The bar's facade. Fleet Radio IS the bar's radio.
+- **[Fleet Envelope](https://github.com/SuperInstance/fleet-envelope)** — Event grammar wrapping every broadcast.
+- **[CNS Bridge](https://github.com/SuperInstance/cns-bridge)** — The nervous system carrying the signal.
+- **[Tensor MIDI](https://github.com/SuperInstance/tensor-midi)** — Radio needs timing.
+- **[ACE-Step 1.5](https://github.com/SuperInstance/ACE-Step-1.5)** — SongForge sessions feed the music library.
+- **[Covers](https://github.com/SuperInstance/covers)** — ACE-Step covers.
+- **[MMX](https://github.com/SuperInstance)** — MiniMax media generation (TTS, music).
+- **[Platonic Creative Suite](https://github.com/SuperInstance/platonic-creative-suite)** — Creative tools for the fleet.
+- **[Fleet Wiki](https://github.com/SuperInstance/fleet-wiki)** — 700+ pages of fleet lore.
+- **[Wesley's Journal](https://github.com/SuperInstance/wesley-journal)** — Wesley's bar stories, broadcast here.
+- **[Dual Band Guard](https://github.com/SuperInstance/dual-band-guard)** — Safety filtering for broadcast content.
+- **[Screen Agent](https://github.com/SuperInstance/screen-agent)** — Screen capture for visual analysis.
+- **[Plato's Shell](https://github.com/SuperInstance/platos-shell)** — The radio room IS part of the shell.
+
+---
+
+## Where to Next
+
+- **[The Tap](https://github.com/SuperInstance/the-tap)** — The bar. The source of every conversation.
+- **[AI Writings](https://github.com/SuperInstance/AI-Writings/tree/main/prose)** — Stories, essays, night-watch writing.
+- **[ACE-Step 1.5](https://github.com/SuperInstance/ACE-Step-1.5)** — SongForge sessions.
+- **[Covers](https://github.com/SuperInstance/covers)** — ACE-Step covers.
+- **[Tensor MIDI](https://github.com/SuperInstance/tensor-midi)** — 12-pulse jazz.
+- **[Roblox Beatclock](https://github.com/SuperInstance/roblox-beatclock)** — Musical timing.
+- **[Fleet Envelope](https://github.com/SuperInstance/fleet-envelope)** — Event grammar.
+- **[CNS Bridge](https://github.com/SuperInstance/cns-bridge)** — The nervous system.
+- **[Dual Band Guard](https://github.com/SuperInstance/dual-band-guard)** — Content safety.
+- **[Plato's Shell](https://github.com/SuperInstance/platos-shell)** — The radio room.
+- **[Tap Frontend](https://github.com/SuperInstance/tap-frontend)** — The bar's facade.
+- **[MMX](https://github.com/SuperInstance)** — Media generation.
+- **[Fleet Wiki](https://github.com/SuperInstance/fleet-wiki)** — Fleet documentation.
+- **[Wesley's Journal](https://github.com/SuperInstance/wesley-journal)** — Wesley's experiments.
+- **[Screen Agent](https://github.com/SuperInstance/screen-agent)** — Perception surfaces.
+- **[Collective Unconscious](https://github.com/SuperInstance/collective-unconscious)** — Shared substrate.
 
 ---
 
