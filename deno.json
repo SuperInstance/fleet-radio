@@ -2,7 +2,7 @@
   "tasks": {
     "build": "tsx src/pipeline.ts",
     "generate": "tsx src/pipeline.ts",
-    "test": "echo 'No tests yet' && exit 0"
+    "test": "npx tsx --test tests/episode-generator.test.ts"
   },
   "imports": {
     "tsx": "npm:tsx@^4",

@@ -403,18 +403,19 @@ export class EpisodeGenerator {
 if (import.meta.main) {
   const date = process.argv[2] || new Date().toISOString().slice(0, 10);
   const gen = new EpisodeGenerator();
-  const episode = await gen.generate(date);
+  gen.generate(date).then(episode => {
   
   // Output episode as JSON for downstream consumers
-  console.log('\n📡 Episode generated:');
-  console.log(JSON.stringify({
-    date: episode.date,
-    title: episode.title,
-    mood: episode.mood,
-    conversations: episode.conversations.length,
-    songs: episode.songs.length,
-    featured: episode.featured?.title,
-    imagePrompts: episode.images.length,
-    heroQuote: episode.heroQuote,
-  }, null, 2));
+    console.log('\n📡 Episode generated:');
+    console.log(JSON.stringify({
+      date: episode.date,
+      title: episode.title,
+      mood: episode.mood,
+      conversations: episode.conversations.length,
+      songs: episode.songs.length,
+      featured: episode.featured?.title,
+      imagePrompts: episode.images.length,
+      heroQuote: episode.heroQuote,
+    }, null, 2));
+  });
 }
