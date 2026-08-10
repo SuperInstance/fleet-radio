@@ -1,0 +1,10 @@
+[
+  {
+    "name": "fleet-radio-daily",
+    "schedule": "0 22 * * *",
+    "timezone": "America/Anchorage",
+    "action": "Run the Fleet Radio pipeline to generate and deploy the daily episode. The agent should: 1) Run `tsx /home/eileen/projects/fleet-radio/src/pipeline.ts` with today's date. 2) The pipeline fetches Tap conversations, selects best exchanges, matches music, generates images, and deploys to ai-writings.pages.dev. 3) Report success or failures.",
+    "session_target": "isolated",
+    "description": "Generate and deploy daily Fleet Radio episode from The Tap conversations"
+  }
+]

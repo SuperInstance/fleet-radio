@@ -1,0 +1,4 @@
+node_modules/
+episodes/audio/
+*.tmp
+.env

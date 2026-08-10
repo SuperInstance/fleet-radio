@@ -1,0 +1,13 @@
+{
+  "tasks": {
+    "build": "tsx src/pipeline.ts",
+    "generate": "tsx src/pipeline.ts",
+    "test": "echo 'No tests yet' && exit 0"
+  },
+  "imports": {
+    "tsx": "npm:tsx@^4",
+    "node:fs": "node:fs",
+    "node:child_process": "node:child_process",
+    "node:path": "node:path"
+  }
+}
