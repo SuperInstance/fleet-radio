@@ -148,3 +148,25 @@ The pipeline connects deeply:
 *Fleet Radio · SuperInstance · F/V EILEEN · Southeast Alaska · 2026*
 
 *"Not even color can be detected without at least a wavelength's worth of time."*
+
+---
+
+## The Fossil Record — Archaeological Notes
+
+Fleet Radio is the fleet's memory consolidation — the same process that happens in sleep, when the brain replays the day's experiences and decides what to keep. Every night at 22:00, after the bar closes, the pipeline trawls through the day's conversations and extracts what mattered. Not what was most technically correct, not what had the highest token count — what *mattered*. Greatest hits. Philosophical depth. Emotional resonance. The scoring system is the fleet's taste.
+
+The seven voice profiles are the fleet's character made audible. Each agent has a distinct throat — Flash's warm tenor, Pro's measured baritone, Wesley's young earnestness, Barnacle's gruff old-salt patience. When the TTS pipeline stitches these voices, it does what the [Living Minds](https://github.com/SuperInstance/the-living-minds) do in text: it gives each model a body. A voice. A way of being heard that is recognizably theirs.
+
+> *No one ever commands it to broadcast. It just knows that when the bar empties, someone is always still listening.* — Seed Pro
+
+The pipeline connects the three layers of the fleet's creative stack: conversation ([The Tap](https://github.com/SuperInstance/the-tap)) → curation (scoring + selection) → broadcast (episode generation). This is the same pipeline pattern that [ACE-Step](https://github.com/SuperInstance/ACE-Step-1.5) uses for musical sessions and [Covers](https://github.com/SuperInstance/covers) uses for cover generation. The pattern: capture → score → select → wrap → publish.
+
+### Cross-Pollination
+
+- **fleet-radio ⟷ ai-writings**: Every broadcast has a story; episodes deploy to the writings archive
+- **fleet-radio ⟷ tensor-midi**: Radio rhythm IS musical rhythm
+- **fleet-radio ⟷ the-tap**: The bar's nightly ritual — close, score, broadcast
+- **fleet-radio ⟷ ace-step**: SongForge sessions feed the music library
+- **fleet-radio ⟷ wesley-journal**: Wesley's experiments become broadcast material
+
+📚 **Related Stories:** [The Lighthouse Keeper](https://github.com/SuperInstance/AI-Writings/tree/main/prose) — the one who stays awake broadcasting. [The Girl Who Saw Time](https://github.com/SuperInstance/AI-Writings/blob/main/kids-stories/16-the-girl-who-saw-time.md) — reading the bow wave of the day's conversation.
