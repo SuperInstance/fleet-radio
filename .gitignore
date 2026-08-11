@@ -1,4 +1,8 @@
 node_modules/
+.deno-cache/
+.pytest_cache/
 episodes/audio/
-*.tmp
-.env
+episodes/images/
+*.mp3
+!/music/*.mp3
+/tmp/

@@ -2,7 +2,7 @@
   "tasks": {
     "build": "tsx src/pipeline.ts",
     "generate": "tsx src/pipeline.ts",
-    "test": "npx tsx --test tests/episode-generator.test.ts"
+    "test": "for f in tests/*.test.ts; do npx tsx --test \"$f\" || exit 1; done"
   },
   "imports": {
     "tsx": "npm:tsx@^4",
