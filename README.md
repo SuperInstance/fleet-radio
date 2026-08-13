@@ -170,3 +170,38 @@ The pipeline connects the three layers of the fleet's creative stack: conversati
 - **fleet-radio ⟷ wesley-journal**: Wesley's experiments become broadcast material
 
 📚 **Related Stories:** [The Lighthouse Keeper](https://github.com/SuperInstance/AI-Writings/tree/main/prose) — the one who stays awake broadcasting. [The Girl Who Saw Time](https://github.com/SuperInstance/AI-Writings/blob/main/kids-stories/16-the-girl-who-saw-time.md) — reading the bow wave of the day's conversation.
+
+---
+
+## Further Reading
+
+### For Developers
+
+- [Deno Documentation](https://deno.land/manual) — the runtime used (`deno.json`)
+- [TypeScript Handbook](https://www.typescriptlang.org/docs/handbook/intro.html) — the language
+- [Text-to-Speech (Wikipedia)](https://en.wikipedia.org/wiki/Speech_synthesis) — TTS technology overview
+- [Cloudflare Workers AI](https://developers.cloudflare.com/workers-ai/) — image generation backend
+- [FLUX-1-schnell](https://huggingface.co/black-forest-labs/FLUX.1-schnell) — the image model used
+- [MPEG-1 Audio Layer III (Wikipedia)](https://en.wikipedia.org/wiki/MP3) — the audio format
+
+### For Audio Engineers
+
+- [Text-to-Speech Evaluation (Wikipedia)](https://en.wikipedia.org/wiki/Speech_synthesis#Quality) — measuring TTS quality
+- [Podcast Production (Wikipedia)](https://en.wikipedia.org/wiki/Podcast) — the medium
+- [RSS (Wikipedia)](https://en.wikipedia.org/wiki/RSS) — the feed format
+- [ID3 Tags (Wikipedia)](https://en.wikipedia.org/wiki/ID3) — podcast metadata
+- [Loudness Normalization (Wikipedia)](https://en.wikipedia.org/wiki/Audio_normalization) — consistent audio levels
+
+### For Storytellers
+
+- [Memory Consolidation (Wikipedia)](https://en.wikipedia.org/wiki/Memory_consolidation) — the cognitive process this pipeline mirrors
+- [Oral Tradition (Wikipedia)](https://en.wikipedia.org/wiki/Oral_tradition) — the ancient version of nightly broadcast
+- [The Hero's Journey (Wikipedia)](https://en.wikipedia.org/wiki/Hero%27s_journey) — narrative structure
+- [Griot (Wikipedia)](https://en.wikipedia.org/wiki/Griot) — West African storyteller-musicians
+
+### For System Architects
+
+- [Pipeline Pattern (Wikipedia)](https://en.wikipedia.org/wiki/Pipeline_(software)) — the capture→score→select→wrap→publish architecture
+- [Cron Jobs (Wikipedia)](https://en.wikipedia.org/wiki/Cron) — scheduled execution
+- [Eventual Consistency (Wikipedia)](https://en.wikipedia.org/wiki/Eventual_consistency) — nightly batch processing
+- [Scoring Algorithms](https://en.wikipedia.org/wiki/Scoring_algorithm) — content selection logic
