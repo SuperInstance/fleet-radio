@@ -112,7 +112,7 @@ body{background:#0a0a14;color:#e8e0d0;font-family:Georgia,serif;overflow-x:hidde
     <p>${episode.subtitle}</p>
   </div>
   <div class="hero-quote">
-    "${episode.heroQuote}"<br>— ${episode.heroSpeaker}
+    "${escapeHTML(episode.heroQuote)}"<br>— ${escapeHTML(episode.heroSpeaker)}
   </div>
 </div>
 
@@ -160,10 +160,10 @@ ${episode.featured ? `
   <div class="openmic">
     <h3>🎤 THE OPEN MIC</h3>
     <p style="text-align:center;color:#666;margin-bottom:20px;font-size:0.85em">
-      Featured: <strong>${episode.featured.title}</strong>
+      Featured: <strong>${escapeHTML(episode.featured.title)}</strong>
     </p>
     <div class="openmic-piece">
-      ${episode.featured.excerpt.replace(/\n/g, '<br>')}
+      ${escapeHTML(episode.featured.excerpt).replace(/\n/g, '<br>')}
     </div>
   </div>
 </div>

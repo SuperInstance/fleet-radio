@@ -257,6 +257,33 @@ describe('renderEpisode — conversations section', () => {
     const html = renderEpisode(episode, sampleImages);
     assert.ok(html.includes('Fish &amp; chips'));
   });
+
+  test('escapes HTML in hero quote and speaker', () => {
+    const episode = makeEpisode({
+      heroQuote: '<script>alert("quote")</script>',
+      heroSpeaker: '<img src=x onerror=alert(1)>',
+    });
+    const html = renderEpisode(episode, sampleImages);
+    assert.ok(!html.includes('<script>alert'));
+    assert.ok(html.includes('&lt;script&gt;'));
+    assert.ok(!html.includes('<img src=x'));
+    assert.ok(html.includes('&lt;img'));
+  });
+
+  test('escapes HTML in featured title and excerpt', () => {
+    const episode = makeEpisode({
+      featured: {
+        title: '<b>Featured</b> <script>bad()</script>',
+        excerpt: 'Line one <script>x</script>\n\nLine two',
+        source: 'f.md',
+      },
+    });
+    const html = renderEpisode(episode, sampleImages);
+    assert.ok(!html.includes('<script>bad'));
+    assert.ok(html.includes('&lt;b&gt;Featured&lt;/b&gt;'));
+    assert.ok(!html.includes('<script>x</script>'));
+    assert.ok(html.includes('&lt;script&gt;x&lt;/script&gt;'));
+  });
 });
 
 // ═══════════════════════════════════════════════
