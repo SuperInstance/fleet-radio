@@ -9,7 +9,7 @@ import { existsSync, mkdirSync, writeFileSync } from 'fs';
 import { execSync } from 'child_process';
 
 const IMAGES_DIR = '/home/eileen/projects/fleet-radio/episodes/images';
-const AIW_RITINGS_IMAGES = '/home/eileen/projects/ai-writings/images';
+const AI_WRITINGS_IMAGES = '/home/eileen/projects/ai-writings/images';
 
 // Default images from the existing fleet-radio.html
 const DEFAULT_IMAGES = [
@@ -29,7 +29,7 @@ export class ImageGenerator {
 
   constructor(imagesDir?: string) {
     this.imagesDir = imagesDir || IMAGES_DIR;
-    this.useExistingImages = existsSync(AIW_RITINGS_IMAGES);
+    this.useExistingImages = existsSync(AI_WRITINGS_IMAGES);
     
     if (!existsSync(this.imagesDir)) {
       mkdirSync(this.imagesDir, { recursive: true });
@@ -98,7 +98,7 @@ export class ImageGenerator {
       }
 
       const resp = await fetch(
-        `https://api.cloudflare.com/client/v4/accounts/${accountId}/ai/run/@cf/black-forest-labs/flux-1-schness`,
+        `https://api.cloudflare.com/client/v4/accounts/${accountId}/ai/run/@cf/black-forest-labs/flux-1-schnell`,
         {
           method: 'POST',
           headers: {
@@ -107,7 +107,8 @@ export class ImageGenerator {
           },
           body: JSON.stringify({
             prompt: `${prompt}, digital painting, atmospheric, moody lighting`,
-            num_steps: 4,
+            // flux-1-schnell caps steps at 4; the parameter is `steps`, not `num_steps`
+            steps: 4,
           }),
         }
       );
