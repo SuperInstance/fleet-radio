@@ -21,6 +21,7 @@ import {
   GeneratedImage,
   Episode,
 } from './types';
+import { pathToFileURL } from 'node:url';
 
 const TAP_API_BASE = 'https://the-tap.casey-digennaro.workers.dev/api';
 const MUSIC_DIR = '/home/eileen/projects/ai-writings/music';
@@ -400,7 +401,12 @@ export class EpisodeGenerator {
 // MAIN — when run directly
 // ═══════════════════════════════════════════════
 
-if (import.meta.main) {
+// import.meta.main is Deno-only; under tsx/Node it's undefined, so direct
+// runs silently no-op'd. Compare against process.argv[1] instead.
+const isMain = process.argv[1] !== undefined
+  && import.meta.url === pathToFileURL(process.argv[1]).href;
+
+if (isMain) {
   const date = process.argv[2] || new Date().toISOString().slice(0, 10);
   const gen = new EpisodeGenerator();
   gen.generate(date).then(episode => {

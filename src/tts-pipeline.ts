@@ -16,11 +16,12 @@
 // 3. Fallback: provide text only, no audio
 
 import { VoiceProfile, AudioSegment } from './types';
-import { execSync } from 'child_process';
+import { execFileSync } from 'child_process';
 import { existsSync, mkdirSync } from 'fs';
 
 const OUTPUT_DIR = '/home/eileen/projects/fleet-radio/episodes/audio';
 const FFMPEG = '/home/eileen/.local/bin/ffmpeg';
+const FFPROBE = '/home/eileen/.local/bin/ffprobe';
 
 // ═══════════════════════════════════════════════
 // VOICE PROFILES
@@ -141,8 +142,9 @@ export class TTSPipeline {
       writeFileSync(concatFile, concatList.join('\n'));
 
       // Run ffmpeg concat
-      execSync(
-        `${FFMPEG} -y -f concat -safe 0 -i "${concatFile}" -c copy "${outputPath}"`,
+      execFileSync(
+        FFMPEG,
+        ['-y', '-f', 'concat', '-safe', '0', '-i', concatFile, '-c', 'copy', outputPath],
         { stdio: 'pipe', timeout: 60000 }
       );
 
@@ -179,9 +181,9 @@ export class TTSPipeline {
       // Map our voice descriptions to MMX voice parameters
       const voiceParams = this.getMmxVoiceParams(voice.voiceId);
       
-      execSync(
-        `mmx speech synthesize --text "${text.replace(/"/g, '\\"')}" ` +
-        `--voice "${voiceParams}" --output "${outputPath}"`,
+      execFileSync(
+        'mmx',
+        ['speech', 'synthesize', '--text', text, '--voice', voiceParams, '--output', outputPath],
         { stdio: 'pipe', timeout: 30000 }
       );
       
@@ -284,15 +286,17 @@ export class TTSPipeline {
 
   private getAudioDuration(filepath: string): number {
     try {
-      const output = execSync(
-        `${FFMPEG} -i "${filepath}" 2>&1 | grep Duration`,
+      // Use ffprobe with JSON output — no shell, no pipes, no parsing grep
+      const output = execFileSync(
+        FFPROBE,
+        ['-v', 'quiet', '-print_format', 'json', '-show_format', filepath],
         { encoding: 'utf-8', stdio: ['pipe', 'pipe', 'pipe'] }
       );
-      const match = output.match(/Duration: (\d+):(\d+):(\d+\.\d+)/);
-      if (match) {
-        return parseInt(match[1]) * 3600 + parseInt(match[2]) * 60 + parseFloat(match[3]);
-      }
-    } catch {}
-    return 0;
+      const info = JSON.parse(output) as { format?: { duration?: string } };
+      const duration = parseFloat(info.format?.duration || '0');
+      return Number.isFinite(duration) ? duration : 0;
+    } catch {
+      return 0;
+    }
   }
 }
