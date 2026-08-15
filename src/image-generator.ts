@@ -6,7 +6,7 @@
 
 import { GeneratedImage, Mood } from './types';
 import { existsSync, mkdirSync, writeFileSync } from 'fs';
-import { execSync } from 'child_process';
+import { execFileSync } from 'child_process';
 
 const IMAGES_DIR = '/home/eileen/projects/fleet-radio/episodes/images';
 const AI_WRITINGS_IMAGES = '/home/eileen/projects/ai-writings/images';
@@ -178,7 +178,9 @@ export class ImageGenerator {
 
     // Try wrangler config
     try {
-      const output = execSync('wrangler whoami 2>&1', { encoding: 'utf-8' });
+      // List-form args — no shell. Errors throw and are caught below;
+      // stderr no longer needs a shell redirect to be merged.
+      const output = execFileSync('wrangler', ['whoami'], { encoding: 'utf-8' });
       const match = output.match(/([a-f0-9]{32})/);
       if (match) return match[1];
     } catch {}

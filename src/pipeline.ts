@@ -17,7 +17,7 @@ import { TTSPipeline } from './tts-pipeline';
 import { renderEpisode } from './episode-template';
 import { ScoredLine, AudioSegment } from './types';
 import { writeFileSync, readFileSync, existsSync, mkdirSync } from 'fs';
-import { execSync } from 'child_process';
+import { execFileSync } from 'child_process';
 
 const EPISODES_DIR = '/home/eileen/projects/fleet-radio/episodes';
 const AIWRITINGS_DIR = '/home/eileen/projects/ai-writings';
@@ -103,9 +103,10 @@ async function main() {
   // ── 6. DEPLOY ──
   console.log('▶ Phase 6: Deploy');
   try {
-    // Deploy ai-writings to Pages
-    execSync(
-      'wrangler pages deploy . --project-name=ai-writings --commit-dirty=true',
+    // Deploy ai-writings to Pages (list-form args — no shell, per fleet critical path rule)
+    execFileSync(
+      'wrangler',
+      ['pages', 'deploy', '.', '--project-name=ai-writings', '--commit-dirty=true'],
       { cwd: AIWRITINGS_DIR, stdio: 'inherit', timeout: 60000 }
     );
     console.log('  ✓ Deployed to ai-writings.pages.dev');

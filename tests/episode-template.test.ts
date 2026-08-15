@@ -287,6 +287,59 @@ describe('renderEpisode — conversations section', () => {
 });
 
 // ═══════════════════════════════════════════════
+// DEFENSE-IN-DEPTH ESCAPING (2026-08-14 hardening)
+// ═══════════════════════════════════════════════
+
+describe('renderEpisode — defense-in-depth escaping', () => {
+  test('escapes user-controlled speaker display_name', () => {
+    const conversations = [{
+      line: makeLine({ content: 'Hi', display_name: '<script>alert(1)</script>' }),
+      score: 50, reason: 'test',
+    }];
+    const html = renderEpisode(makeEpisode({ conversations }), sampleImages);
+    assert.ok(!html.includes('<script>alert(1)'), 'raw script must not appear');
+    // Uppercase happens BEFORE escaping, so entity names stay lowercase.
+    assert.ok(html.includes('&lt;SCRIPT&gt;ALERT(1)&lt;/SCRIPT&gt;'), 'escaped speaker survives uppercasing');
+  });
+
+  test('escapes room_id and score reason in tap metadata', () => {
+    const conversations = [{
+      line: makeLine({ content: 'Hi', room_id: '<b>room</b>' }),
+      score: 50, reason: '<img src=x onerror=alert(1)>',
+    }];
+    const html = renderEpisode(makeEpisode({ conversations }), sampleImages);
+    assert.ok(!html.includes('<b>room</b>'));
+    assert.ok(html.includes('&lt;b&gt;room&lt;/b&gt;'));
+    assert.ok(!html.includes('<img src=x'));
+    assert.ok(html.includes('&lt;img'));
+  });
+
+  test('escapes music track title, description, and path', () => {
+    const songs = [{
+      filename: 'song-1.mp3',
+      title: '<b>Song</b> <script>bad()</script>',
+      description: 'Desc "quoted"',
+      bpm: 90,
+      mood: ['contemplative'],
+      path: '/music/a"><script>x()</script>.mp3',
+    }];
+    const html = renderEpisode(makeEpisode({ songs }), sampleImages);
+    assert.ok(!html.includes('<script>bad'));
+    assert.ok(html.includes('&lt;b&gt;Song&lt;/b&gt;'));
+    assert.ok(!html.includes('<script>x()</script>'));
+    assert.ok(html.includes('&quot;'));
+  });
+
+  test('escapes gallery captions in figcaption and alt attribute', () => {
+    // Captions are passed as renderEpisode's second arg (gallery source).
+    const malicious = [{ filename: 'a.jpg', caption: '" onerror="alert(1)" x="' }];
+    const html = renderEpisode(makeEpisode(), malicious);
+    assert.ok(!html.includes('onerror="'), 'cannot break out of alt attribute');
+    assert.ok(html.includes('&quot; onerror=&quot;alert(1)&quot; x=&quot;'), 'caption fully escaped');
+  });
+});
+
+// ═══════════════════════════════════════════════
 // SPEAKER CSS CLASSES
 // ═══════════════════════════════════════════════
 

@@ -33,6 +33,21 @@ fleet-radio/
 └── deno.json                 # Deno config (for tsx execution)
 ```
 
+## State — 2026-08-14
+
+**Tests: 165 green, 0 skipped** (was 118 → 161 across the 08-13 fixes, then +4 hardening tests today).
+
+Recent fixes, all locked in by the suite:
+
+- **Image generation 404 fix** — the Workers AI model id in `image-generator.ts` didn't match the catalog, so every image call returned HTTP 404. Corrected to `@cf/black-forest-labs/flux-1-schnell` and fixed the parameter name (`steps`, not `num_steps`; flux-1-schnell caps at 4). The model id is a Workers AI catalog alias, not a pinned version — a comment in `image-generator.ts` flags the steps cap. If generation fails again, the pipeline falls back to the curated default-image library.
+- **XSS hardening** — episode pages now escape all *known* user/agent-sourced text. Two passes:
+  - 08-13: hero quote, hero speaker, featured piece title/excerpt (+2 tests)
+  - 08-14 defense-in-depth: tap speaker display names, room ids, score reasons, music track title/description/path, gallery captions (figcaption **and** `alt` attributes) (+4 tests)
+  Internally generated fields (subtitle, dates, filenames) are constructed by the pipeline, not by user input.
+- **Direct-run support** — the pipeline runs under `tsx` with no Deno install required (`deno.json` maps imports to `npm:tsx`).
+- **Shell-string subprocess ban enforced** — fleet critical path rule: never `shell=True` / `os.system` / shell-string `execSync`; list-form array args only. All subprocess calls are now `execFileSync('cmd', [args...])`, no shell. The audit grep over `src` code is clean (`grep -rnE "shell=True|os\.system|execSync\(|child_process.*exec\(|subprocess.*shell=" src --include="*.ts"` returns nothing), and a dedicated test (`tests/shell-ban.test.ts` — which intentionally contains the banned patterns as regex strings) enforces the ban in CI so a regression fails the suite. The sweep also fixed a latent bug: `isMmxAvailable()` called an *unimported* `execSync`, so MMX was silently reported unavailable on every direct run.
+- **Memory profile** — design commitment, not yet benchmarked: the generator fetches one day's conversation per Tap room, scores in memory, and selects 5-10 lines. Bounded O(batch) per run; no unbounded corpus or stream is loaded whole.
+
 ## The Voices
 
 Each agent character has a distinct TTS voice profile:
@@ -57,7 +72,7 @@ Moods: `contemplative`, `energetic`, `melancholic`, `playful`, `mysterious`, `wa
 
 ## Image Generation
 
-Images are generated via **Cloudflare Workers AI** (`@cf/black-forest-labs/flux-1-schnell`). Prompts are derived from the day's conversation themes — the ocean, the boat, the bar, the night sky, the fleet at rest.
+Images are generated via **Cloudflare Workers AI** (`@cf/black-forest-labs/flux-1-schnell`, `steps: 4`). Prompts are derived from the day's conversation themes — the ocean, the boat, the bar, the night sky, the fleet at rest.
 
 When generation is unavailable, the pipeline falls back to the existing curated image library.
 
@@ -80,12 +95,17 @@ Penalties:
 
 ## Running
 
+No build step and no Deno binary needed — `tsx` runs the TypeScript directly:
+
 ```bash
 # Generate today's episode
-tsx src/pipeline.ts
+npx tsx src/pipeline.ts
 
 # Generate a specific date
-tsx src/pipeline.ts 2026-08-09
+npx tsx src/pipeline.ts 2026-08-09
+
+# Run the test suite (165 tests across 5 files)
+for f in tests/*.test.ts; do npx tsx --test "$f" || exit 1; done
 ```
 
 ## Cron

@@ -163,7 +163,9 @@ export class TTSPipeline {
   private isMmxAvailable(): boolean {
     if (this.mmxAvailable !== null) return this.mmxAvailable;
     try {
-      execSync('which mmx', { stdio: 'pipe' });
+      // List-form args — no shell. (Previously an unimported execSync call:
+      // latent ReferenceError made MMX silently unavailable on every run.)
+      execFileSync('which', ['mmx'], { stdio: 'pipe' });
       this.mmxAvailable = true;
     } catch {
       this.mmxAvailable = false;

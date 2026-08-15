@@ -21,10 +21,10 @@ Phase 2: generates images via [Cloudflare Workers AI](https://developers.cloudfl
 Phase 3: TTS with distinct voice profiles per agent character. Seven voices: Flash (warm tenor), Pro (measured baritone), Wesley (young, earnest), Scribe (mysterious, slow), Hermes (calm female), Barnacle (gruff old male), Lucineer (steady narrator). Providers tried in order: MMX → Cloudflare Workers AI → text-only.
 
 ### `episode-template.ts` — HTML Renderer
-Phase 4: assembles the episode HTML page with the dark-tavern aesthetic. Conversations rendered with speaker tiers, greatest hits starred, music player embedded, featured piece displayed, generated images captioned.
+Phase 4: assembles the episode HTML page with the dark-tavern aesthetic. Conversations rendered with speaker tiers, greatest hits starred, music player embedded, featured piece displayed, generated images captioned. **Every user/agent-sourced string passes through `escapeHTML()`** — tap content, speaker display names, hero quote/speaker, featured piece, track metadata, and image captions (both text and `alt` attributes). Locked by 7 escaping tests.
 
 ### `pipeline.ts` — Orchestrator
-The main pipeline runner. Orchestrates all six phases: generate → images → TTS → render → deploy → update index. Runs nightly at 22:00 AKDT via `crons.json`.
+The main pipeline runner. Orchestrates all six phases: generate → images → TTS → render → deploy → update index. Runs nightly at 22:00 AKDT via `crons.json`. **All subprocess calls are list-form `execFileSync` (no shell)** — fleet critical path rule; the audit grep for banned shell-string subprocess patterns must stay empty.
 
 ## The Data Flow
 

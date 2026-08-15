@@ -106,7 +106,7 @@ body{background:#0a0a14;color:#e8e0d0;font-family:Georgia,serif;overflow-x:hidde
 
 <!-- Hero -->
 <div class="hero">
-  ${images[0] ? `<img src="/images/${images[0].filename}" alt="${images[0].caption}">` : ''}
+  ${images[0] ? `<img src="/images/${images[0].filename}" alt="${escapeHTML(images[0].caption)}">` : ''}
   <div class="hero-text">
     <h1>⚓ FLEET RADIO</h1>
     <p>${episode.subtitle}</p>
@@ -128,7 +128,7 @@ body{background:#0a0a14;color:#e8e0d0;font-family:Georgia,serif;overflow-x:hidde
 <div class="section">
   <h2>🎨 The View From Here</h2>
   <div class="gallery">
-    ${images.map(img => `    <figure><img src="/images/${img.filename}" loading="lazy"><figcaption>${img.caption}</figcaption></figure>`).join('\n')}
+    ${images.map(img => `    <figure><img src="/images/${img.filename}" loading="lazy" alt="${escapeHTML(img.caption)}"><figcaption>${escapeHTML(img.caption)}</figcaption></figure>`).join('\n')}
   </div>
 </div>
 
@@ -228,16 +228,19 @@ function songHTML(track: MusicTrack, num: number): string {
   return `    <div class="track">
     <div class="track-num">${String(num).padStart(2, '0')}</div>
     <div class="track-info">
-      <div class="track-title">${track.title}</div>
-      <div class="track-desc">${track.description} ${track.bpm} BPM.</div>
+      <div class="track-title">${escapeHTML(track.title)}</div>
+      <div class="track-desc">${escapeHTML(track.description)} ${track.bpm} BPM.</div>
     </div>
-    <audio controls preload="none"><source src="${track.path}" type="audio/mpeg"></audio>
+    <audio controls preload="none"><source src="${escapeHTML(track.path)}" type="audio/mpeg"></audio>
   </div>`;
 }
 
 function tapLineHTML(item: ScoredLine): string {
   const line = item.line;
-  const speaker = line.display_name || line.agent_id;
+  // display_name is user/agent-sourced. Uppercase FIRST, then escape —
+  // escaping an already-uppercased string keeps entity names lowercase
+  // (&lt; etc.), avoiding any reliance on case-insensitive HTML entities.
+  const speaker = escapeHTML((line.display_name || line.agent_id).toUpperCase());
   const cssClass = getSpeakerCSSClass(line.agent_id);
   const time = new Date(line.timestamp).toLocaleTimeString('en-US', { 
     hour: 'numeric', minute: '2-digit',
@@ -245,9 +248,9 @@ function tapLineHTML(item: ScoredLine): string {
   });
 
   return `    <div class="tap-line">
-      <div class="tap-speaker ${cssClass}">${speaker.toUpperCase()}</div>
+      <div class="tap-speaker ${cssClass}">${speaker}</div>
       <div class="tap-text">${escapeHTML(line.content)}</div>
-      <div class="tap-meta">${time} · ${line.room_id}${item.reason ? ` · ${item.reason}` : ''}</div>
+      <div class="tap-meta">${time} · ${escapeHTML(line.room_id)}${item.reason ? ` · ${escapeHTML(item.reason)}` : ''}</div>
     </div>`;
 }
 
