@@ -21,7 +21,8 @@ import { execFileSync } from 'child_process';
 
 const EPISODES_DIR = '/home/eileen/projects/fleet-radio/episodes';
 const AIWRITINGS_DIR = '/home/eileen/projects/ai-writings';
-const AIWRITINGS_INDEX = `${AIWRITINGS_DIR}/fleet-radio.html`;
+// fleet-radio.html moved to site/ in the Aug 2026 reorganization
+const AIWRITINGS_INDEX = `${AIWRITINGS_DIR}/site/fleet-radio.html`;
 
 async function main() {
   const date = process.argv[2] || new Date().toLocaleDateString('en-CA', { 
@@ -104,10 +105,12 @@ async function main() {
   console.log('▶ Phase 6: Deploy');
   try {
     // Deploy ai-writings to Pages (list-form args — no shell, per fleet critical path rule)
+    // The tree is ~11k files / ~2.7GB, so upload needs a generous timeout.
+    // 60s was too short — wrangler hit ETIMEDOUT mid-upload at ~10k/11k files.
     execFileSync(
       'wrangler',
       ['pages', 'deploy', '.', '--project-name=ai-writings', '--commit-dirty=true'],
-      { cwd: AIWRITINGS_DIR, stdio: 'inherit', timeout: 60000 }
+      { cwd: AIWRITINGS_DIR, stdio: 'inherit', timeout: 900000 }
     );
     console.log('  ✓ Deployed to ai-writings.pages.dev');
   } catch (err) {
@@ -141,7 +144,8 @@ async function updateIndex(latestDate: string) {
     month: 'long', day: 'numeric', year: 'numeric',
   });
 
-  // Replace the subtitle line
+  // Replace the subtitle line (best-effort — the current index has a
+  // static tagline, so this is usually a no-op)
   html = html.replace(
     /Afterhours at The Tap · Open Mic Series · [A-Za-z]+ \d+, \d{4}/,
     `Afterhours at The Tap · Open Mic Series · ${dateFormatted}`
@@ -150,25 +154,19 @@ async function updateIndex(latestDate: string) {
   // Add episode archive link if not present
   const archiveLink = `fleet-radio/${latestDate}.html`;
   if (!html.includes(archiveLink)) {
-    // Add an archive section before the footer
+    // Insert an archive section before the footer (the real index uses
+    // <div class="footer"> — the old `<!-- Footer -->` marker is long gone)
     const archiveSection = `
 <!-- Episode Archive -->
-<div class="section">
-  <h2>📡 Episode Archive</h2>
+<div class="section" id="archive">
+  <h2>📡 Episode Archive<span class="sub">The latest conversations, music, and stories from The Tap</span></h2>
   <div class="tap-convo">
-    <div class="tap-line">
-      <div class="tap-speaker lucineer">LATEST EPISODE</div>
-      <div class="tap-text">
-        <a href="${archiveLink}" style="color:#44cc88">${dateFormatted}</a>
-        — The latest conversations, music, and stories from The Tap.
-      </div>
-    </div>
+    <div class="tap-line"><div class="tap-speaker s-lucineer">LATEST EPISODE</div><div class="tap-text"><a href="${archiveLink}" style="color:#44cc88">${dateFormatted}</a> — the latest conversations from The Tap.</div></div>
   </div>
 </div>
 
 `;
-    // Insert before the footer
-    html = html.replace(/<!-- Footer -->/, `${archiveSection}<!-- Footer -->`);
+    html = html.replace(/<div class="footer">/, `${archiveSection}<div class="footer">`);
   }
 
   writeFileSync(indexPath, html);

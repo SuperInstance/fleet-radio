@@ -29,6 +29,25 @@ const STORIES_DIR = '/home/eileen/projects/ai-writings/earned-stories';
 const EPISODES_DIR = '/home/eileen/projects/fleet-radio/episodes';
 
 // ═══════════════════════════════════════════════
+// TIMESTAMP PARSING
+// ═══════════════════════════════════════════════
+
+/**
+ * Parse a Tap API timestamp into a Date.
+ *
+ * The Tap worker stores timestamps with SQLite `datetime('now')`, which is
+ * UTC, serialized as `YYYY-MM-DD HH:MM:SS` (no timezone marker). Parsing that
+ * string directly with `new Date(...)` treats it as LOCAL time, which shifts
+ * every line by the local UTC offset (8h in Alaska) and pushes recent lines
+ * outside the episode's 24h window — the cause of "Conversations fetched: 0".
+ *
+ * Fix: normalize to an ISO-8601 string with an explicit `Z` (UTC) suffix.
+ */
+export function parseTapTimestamp(ts: string): Date {
+  return new Date(ts.replace(' ', 'T') + 'Z');
+}
+
+// ═══════════════════════════════════════════════
 // MUSIC CATALOG — annotated library
 // ═══════════════════════════════════════════════
 
@@ -128,15 +147,16 @@ export class EpisodeGenerator {
 
     return allLines
       .filter(line => {
-        const lineDate = new Date(line.timestamp);
+        const lineDate = parseTapTimestamp(line.timestamp);
         return lineDate >= cutoff && lineDate <= targetDate;
       })
-      .sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime());
+      .sort((a, b) => parseTapTimestamp(a.timestamp).getTime() - parseTapTimestamp(b.timestamp).getTime());
   }
 
   async fetchRoomConversation(roomId: string): Promise<TapLine[]> {
     try {
-      const resp = await fetch(`${TAP_API_BASE}/conversation/${roomId}`, {
+      // limit=200 (API max) so active rooms aren't truncated to the default 50
+      const resp = await fetch(`${TAP_API_BASE}/conversation/${roomId}?limit=200`, {
         signal: AbortSignal.timeout(10000),
       });
       if (!resp.ok) return [];
