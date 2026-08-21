@@ -51,7 +51,9 @@ export function parseTapTimestamp(ts: string): Date {
 // MUSIC CATALOG — annotated library
 // ═══════════════════════════════════════════════
 
-const MUSIC_CATALOG: MusicTrack[] = [
+/** The annotated library — exported for the variety show (bumper music game,
+ *  jukebox) which needs the catalog beyond selectSongs' setlist contract. */
+export const MUSIC_CATALOG: MusicTrack[] = [
   { filename: '01-unplayed-indie-folk.mp3', title: 'Unplayed', description: 'Weathered baritone, acoustic guitar. The song you haven\'t played yet.', bpm: 68, mood: ['contemplative', 'melancholic'], family: 'unplayed', path: '/music/01-unplayed-indie-folk.mp3' },
   { filename: '02-see-you-at-the-table.mp3', title: 'See You At The Table', description: 'Warm duet, acoustic guitar. The only promise that tomorrow will be different.', bpm: 82, mood: ['warm', 'contemplative'], family: 'unplayed', path: '/music/02-see-you-at-the-table.mp3' },
   { filename: '03-five-holes-in-a-bone.mp3', title: 'Five Holes in a Bone', description: 'The oldest known flute. 40,000 years old. Someone was making music before they were farming.', bpm: 70, mood: ['contemplative', 'mysterious'], family: 'five-holes', path: '/music/03-five-holes-in-a-bone.mp3' },

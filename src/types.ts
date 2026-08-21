@@ -91,3 +91,66 @@ export interface AudioSegment {
   audioFile: string | null;
   duration: number;
 }
+
+// ═══════════════════════════════════════════════
+// VARIETY SHOW (THE TAP VARIETY HOUR) TYPES
+// ═══════════════════════════════════════════════
+
+/** A scripted radio line with a fleet voice. audioFile is the TTS hook —
+ *  null when TTS is unavailable (auth-blocked), filled by tts-pipeline. */
+export interface VoiceLine {
+  speaker: string;      // display name (e.g. 'Lucineer', 'Hermes')
+  voiceId: string;      // tts-pipeline voice id (e.g. 'steady_narrator')
+  cssClass: string;     // host | cohost
+  text: string;
+  audioFile: string | null;
+}
+
+/** One round of the Bumper Music Game: a real clue (the track's own
+ *  catalog description) and the real answer (the track title). */
+export interface BumperRound {
+  clue: string;
+  song: MusicTrack;
+  revealed: boolean;
+}
+
+/** A listener letter: a real quote from a real fleet file + a reply. */
+export interface ListenerLetter {
+  source: string;       // real file path (model-portraits/, earned-stories/, chronicle/)
+  from: string;         // attributed sender, derived from the source file
+  excerpt: string;      // real quoted line from the file
+  reply: string;        // fleet-voice reply
+}
+
+/** A Weather Buoy report — real recent fleet commits as weather. */
+export interface WeatherReport {
+  region: string;       // e.g. 'High pressure over the Elephant grounds'
+  condition: string;    // short summary
+  detail: string;       // real commit subject
+  repo: string;
+  commit: string;       // short hash
+}
+
+/** A Bar Bet trivia question — real fleet numbers behind every answer. */
+export interface TriviaQuestion {
+  question: string;
+  answer: string;
+  fact: string;         // the real data the question is built from
+}
+
+export interface VarietyEpisode {
+  date: string;
+  title: string;
+  subtitle: string;
+  mood: Mood;
+  heroQuote: string;
+  heroSpeaker: string;
+  coldOpen: VoiceLine[];
+  bumperRounds: BumperRound[];
+  letters: ListenerLetter[];
+  weather: WeatherReport[];
+  jukebox: MusicTrack[];
+  trivia: TriviaQuestion[];
+  signoff: VoiceLine[];
+  images: GeneratedImage[];
+}

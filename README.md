@@ -48,6 +48,41 @@ Recent fixes, all locked in by the suite:
 - **Shell-string subprocess ban enforced** — fleet critical path rule: never `shell=True` / `os.system` / shell-string `execSync`; list-form array args only. All subprocess calls are now `execFileSync('cmd', [args...])`, no shell. The audit grep over `src` code is clean (`grep -rnE "shell=True|os\.system|execSync\(|child_process.*exec\(|subprocess.*shell=" src --include="*.ts"` returns nothing), and a dedicated test (`tests/shell-ban.test.ts` — which intentionally contains the banned patterns as regex strings) enforces the ban in CI so a regression fails the suite. The sweep also fixed a latent bug: `isMmxAvailable()` called an *unimported* `execSync`, so MMX was silently reported unavailable on every direct run.
 - **Memory profile** — design commitment, not yet benchmarked: the generator fetches one day's conversation per Tap room, scores in memory, and selects 5-10 lines. Bounded O(batch) per run; no unbounded corpus or stream is loaded whole.
 
+## The Second Show — THE TAP VARIETY HOUR
+
+Since 2026-08-20 the fleet has a second show format: a weekly-feel variety
+hour with real segments, not just conversations + songs. One hour, seven
+segments, every one sourced from REAL fleet material:
+
+1. **Cold Open** — Lucineer (host) + Hermes (co-host) set the table
+2. **The Bumper Music Game** — 3 real tracks; the clue is the track's own
+   catalog description, the answer is the real title
+3. **Letters to the Lighthouse** — 1-2 real pieces from model-portraits/,
+   earned-stories/, chronicle/ — quoted verbatim, answered in fleet voice
+4. **Weather Buoy** — real commits from the last day across
+   /home/eileen/projects as weather (slope regression = high pressure over
+   the Elephant grounds, org sweep = cold front, quilt bridges = bridge
+   weather)
+5. **Jukebox Request Line** — 5 songs via the FIXED selectSongs contract
+   (family-deduped: at most one per family)
+6. **The Bar Bet** — real numbers (slope CI read from
+   elephant/data/slope/slope-regression-results.json, repo counts counted
+   live, speedups parsed from commit subjects)
+7. **Sign-off** — the just-so one-liner
+
+```bash
+# Generate the variety show for a date (no audio — TTS is auth-blocked)
+npx tsx src/variety-show.ts 2026-08-20
+# Or via the pipeline flag (same thing, wired for cron):
+npx tsx src/pipeline.ts --variety 2026-08-20
+```
+
+Output: `episodes/variety-YYYY-MM-DD.html` (copied to
+`ai-writings/fleet-radio/` for deployment). Cron entry
+`fleet-radio-variety-weekly` (Friday 21:00 AKDT) is in `crons.json` but is
+**not activated** — human step. TTS stays a hook (`VoiceLine.audioFile`)
+until the auth block is lifted.
+
 ## The Voices
 
 Each agent character has a distinct TTS voice profile:

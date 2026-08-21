@@ -6,5 +6,13 @@
     "action": "Run the Fleet Radio pipeline to generate and deploy the daily episode. The agent should: 1) Run `tsx /home/eileen/projects/fleet-radio/src/pipeline.ts` with today's date. 2) The pipeline fetches Tap conversations, selects best exchanges, matches music, generates images, and deploys to ai-writings.pages.dev. 3) Report success or failures.",
     "session_target": "isolated",
     "description": "Generate and deploy daily Fleet Radio episode from The Tap conversations"
+  },
+  {
+    "name": "fleet-radio-variety-weekly",
+    "schedule": "0 21 * * 5",
+    "timezone": "America/Anchorage",
+    "action": "Run the Fleet Radio VARIETY show generator (THE TAP VARIETY HOUR — the weekly second show format). The agent should: 1) Run `tsx /home/eileen/projects/fleet-radio/src/pipeline.ts --variety` with today's date. 2) The pipeline fetches real Tap conversations, real music (family-deduped setlist), real listener mail (model-portraits/earned-stories/chronicle), real fleet weather (git log --since=1 day across /home/eileen/projects), and real trivia numbers, then renders episodes/variety-YYYY-MM-DD.html and copies it to ai-writings/fleet-radio/. 3) TTS is auth-blocked — keep the audio hooks, do NOT generate audio. 4) Commit the episode and report.",
+    "session_target": "isolated",
+    "description": "Generate and publish the weekly Fleet Radio variety show (THE TAP VARIETY HOUR)"
   }
 ]

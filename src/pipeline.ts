@@ -15,6 +15,7 @@ import { EpisodeGenerator } from './generate-episode';
 import { ImageGenerator, DEFAULT_IMAGES } from './image-generator';
 import { TTSPipeline } from './tts-pipeline';
 import { renderEpisode } from './episode-template';
+import { runVarietyShow } from './variety-show';
 import { ScoredLine, AudioSegment } from './types';
 import { writeFileSync, readFileSync, existsSync, mkdirSync } from 'fs';
 import { execFileSync } from 'child_process';
@@ -25,6 +26,23 @@ const AIWRITINGS_DIR = '/home/eileen/projects/ai-writings';
 const AIWRITINGS_INDEX = `${AIWRITINGS_DIR}/site/fleet-radio.html`;
 
 async function main() {
+  // --variety runs THE TAP VARIETY HOUR (the weekly second format) instead of
+  // the daily afterhours episode. The cron entry `fleet-radio-variety-weekly`
+  // (crons.json) uses this flag. The variety path renders with audio hooks but
+  // skips the pages deploy + index update — those stay manual/human steps.
+  const variety = process.argv.includes('--variety');
+  if (variety) {
+    const vdate = process.argv[2] && !process.argv[2].startsWith('--')
+      ? process.argv[2]
+      : new Date().toLocaleDateString('en-CA', { timeZone: 'America/Anchorage' });
+    const path = await runVarietyShow(vdate);
+    console.log(`\n╔══════════════════════════════════════════╗`);
+    console.log(`║  🎪 THE TAP VARIETY HOUR — Complete!      ║`);
+    console.log(`║  ${path}  ║`);
+    console.log(`╚══════════════════════════════════════════╝`);
+    return;
+  }
+
   const date = process.argv[2] || new Date().toLocaleDateString('en-CA', { 
     timeZone: 'America/Anchorage' 
   });
