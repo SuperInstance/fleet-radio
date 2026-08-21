@@ -44,6 +44,9 @@ export interface MusicTrack {
   description: string;
   bpm: number;
   mood: Mood[];
+  /** Song family — tracks from the same family are alternate renders of the same song.
+   *  selectSongs() never picks two tracks from the same family in one episode. */
+  family: string;
   path: string;
 }
 

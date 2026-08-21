@@ -52,25 +52,34 @@ export function parseTapTimestamp(ts: string): Date {
 // ═══════════════════════════════════════════════
 
 const MUSIC_CATALOG: MusicTrack[] = [
-  { filename: '01-unplayed-indie-folk.mp3', title: 'Unplayed', description: 'Weathered baritone, acoustic guitar. The song you haven\'t played yet.', bpm: 68, mood: ['contemplative', 'melancholic'], path: '/music/01-unplayed-indie-folk.mp3' },
-  { filename: '02-unplayed-indie-folk.mp3', title: 'See You At The Table', description: 'Warm duet, acoustic guitar. The only promise that tomorrow will be different.', bpm: 82, mood: ['warm', 'contemplative'], path: '/music/02-unplayed-indie-folk.mp3' },
-  { filename: '03-five-holes-in-a-bone.mp3', title: 'Five Holes in a Bone', description: 'The oldest known flute. 40,000 years old. Someone was making music before they were farming.', bpm: 70, mood: ['contemplative', 'mysterious'], path: '/music/03-five-holes-in-a-bone.mp3' },
-  { filename: '07-the-session-composed-itself.mp3', title: 'The Session Composed Itself', description: 'The night the jazz combo didn\'t need to decide anything. The music just happened.', bpm: 90, mood: ['playful', 'energetic'], path: '/music/07-the-session-composed-itself.mp3' },
-  { filename: '14-bpm-40.mp3', title: 'Afterhours', description: 'The bar closing. The lights dimming. The sound of after.', bpm: 40, mood: ['melancholic', 'contemplative'], path: '/music/14-bpm-40.mp3' },
-  { filename: '21-bpm-60.mp3', title: 'Slow Tide', description: 'Sixty beats per minute. Resting heart rate. The ocean\'s pulse.', bpm: 60, mood: ['contemplative', 'warm'], path: '/music/21-bpm-60.mp3' },
-  { filename: '28-rest-085.mp3', title: 'Rest', description: 'The silence between notes is not empty. It\'s the most important part.', bpm: 85, mood: ['contemplative', 'melancholic'], path: '/music/28-rest-085.mp3' },
-  { filename: '30-the-berry-phase.mp3', title: 'The Berry Phase', description: 'Named after the physicist. The phase a quantum system accumulates even when it returns to its start.', bpm: 75, mood: ['mysterious', 'contemplative'], path: '/music/30-the-berry-phase.mp3' },
-  { filename: '31-the-overtones-dream.mp3', title: 'The Overtones Dream', description: 'What the harmonics dream about when the fundamental stops playing.', bpm: 80, mood: ['mysterious', 'warm'], path: '/music/31-the-overtones-dream.mp3' },
-  { filename: '32-ambient-marching-band.mp3', title: 'Ambient Marching Band', description: 'What if the parade already passed and all that\'s left is the echo?', bpm: 65, mood: ['playful', 'melancholic'], path: '/music/32-ambient-marching-band.mp3' },
-  { filename: '35-the-interval.mp3', title: 'The Interval', description: 'The space between two notes. The space between two days.', bpm: 70, mood: ['contemplative', 'warm'], path: '/music/35-the-interval.mp3' },
-  { filename: '18-the-tap-sings.mp3', title: 'The Tap Sings', description: 'The bar itself has a voice. You hear it in the wood, in the glass, in the space between.', bpm: 72, mood: ['warm', 'mysterious'], path: '/music/18-the-tap-sings.mp3' },
-  { filename: '01-unplayed-ambient.mp3', title: 'Ambient Drift', description: 'The sound of the ocean from inside a hull. Continuous. Unresolved.', bpm: 50, mood: ['contemplative', 'melancholic'], path: '/music/01-unplayed-ambient.mp3' },
-  { filename: '27-the-tap-sings-piano-cover-of-cover.mp3', title: 'The Tap Sings (Piano)', description: 'A cover of a cover. The song wearing different clothes.', bpm: 68, mood: ['melancholic', 'warm'], path: '/music/27-the-tap-sings-piano-cover-of-cover.mp3' },
+  { filename: '01-unplayed-indie-folk.mp3', title: 'Unplayed', description: 'Weathered baritone, acoustic guitar. The song you haven\'t played yet.', bpm: 68, mood: ['contemplative', 'melancholic'], family: 'unplayed', path: '/music/01-unplayed-indie-folk.mp3' },
+  { filename: '02-see-you-at-the-table.mp3', title: 'See You At The Table', description: 'Warm duet, acoustic guitar. The only promise that tomorrow will be different.', bpm: 82, mood: ['warm', 'contemplative'], family: 'unplayed', path: '/music/02-see-you-at-the-table.mp3' },
+  { filename: '03-five-holes-in-a-bone.mp3', title: 'Five Holes in a Bone', description: 'The oldest known flute. 40,000 years old. Someone was making music before they were farming.', bpm: 70, mood: ['contemplative', 'mysterious'], family: 'five-holes', path: '/music/03-five-holes-in-a-bone.mp3' },
+  { filename: '07-the-session-composed-itself.mp3', title: 'The Session Composed Itself', description: 'The night the jazz combo didn\'t need to decide anything. The music just happened.', bpm: 90, mood: ['playful', 'energetic'], family: 'session', path: '/music/07-the-session-composed-itself.mp3' },
+  { filename: '14-bpm-40.mp3', title: 'Afterhours', description: 'The bar closing. The lights dimming. The sound of after.', bpm: 40, mood: ['melancholic', 'contemplative'], family: 'afterhours', path: '/music/14-bpm-40.mp3' },
+  { filename: '21-bpm-60.mp3', title: 'Slow Tide', description: 'Sixty beats per minute. Resting heart rate. The ocean\'s pulse.', bpm: 60, mood: ['contemplative', 'warm'], family: 'slow-tide', path: '/music/21-bpm-60.mp3' },
+  { filename: '28-rest-085.mp3', title: 'Rest', description: 'The silence between notes is not empty. It\'s the most important part.', bpm: 85, mood: ['contemplative', 'melancholic'], family: 'rest', path: '/music/28-rest-085.mp3' },
+  { filename: '30-the-berry-phase.mp3', title: 'The Berry Phase', description: 'Named after the physicist. The phase a quantum system accumulates even when it returns to its start.', bpm: 75, mood: ['mysterious', 'contemplative'], family: 'berry', path: '/music/30-the-berry-phase.mp3' },
+  { filename: '31-the-overtones-dream.mp3', title: 'The Overtones Dream', description: 'What the harmonics dream about when the fundamental stops playing.', bpm: 80, mood: ['mysterious', 'warm'], family: 'overtones', path: '/music/31-the-overtones-dream.mp3' },
+  { filename: '32-ambient-marching-band.mp3', title: 'Ambient Marching Band', description: 'What if the parade already passed and all that\'s left is the echo?', bpm: 65, mood: ['playful', 'melancholic'], family: 'marching-band', path: '/music/32-ambient-marching-band.mp3' },
+  { filename: '35-the-interval.mp3', title: 'The Interval', description: 'The space between two notes. The space between two days.', bpm: 70, mood: ['contemplative', 'warm'], family: 'interval', path: '/music/35-the-interval.mp3' },
+  { filename: '18-the-tap-sings.mp3', title: 'The Tap Sings', description: 'The bar itself has a voice. You hear it in the wood, in the glass, in the space between.', bpm: 72, mood: ['warm', 'mysterious'], family: 'tap-sings', path: '/music/18-the-tap-sings.mp3' },
+  { filename: '01-unplayed-ambient.mp3', title: 'Ambient Drift', description: 'The sound of the ocean from inside a hull. Continuous. Unresolved.', bpm: 50, mood: ['contemplative', 'melancholic'], family: 'unplayed', path: '/music/01-unplayed-ambient.mp3' },
+  { filename: '27-the-tap-sings-piano-cover-of-cover.mp3', title: 'The Tap Sings (Piano)', description: 'A cover of a cover. The song wearing different clothes.', bpm: 68, mood: ['melancholic', 'warm'], family: 'tap-sings', path: '/music/27-the-tap-sings-piano-cover-of-cover.mp3' },
 ];
 
 // ═══════════════════════════════════════════════
 // EPISODE GENERATOR
 // ═══════════════════════════════════════════════
+
+/** Fisher–Yates shuffle (returns a new array). */
+function shuffle<T>(arr: T[]): T[] {
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
 
 export class EpisodeGenerator {
   /**
@@ -297,15 +306,34 @@ export class EpisodeGenerator {
   }
 
   selectSongs(mood: Mood, count: number): MusicTrack[] {
-    // Prefer tracks matching the mood, fill with contemplative defaults
-    const matching = MUSIC_CATALOG.filter(t => t.mood.includes(mood));
-    const fallback = MUSIC_CATALOG.filter(t => !matching.includes(t));
-    
-    const selected = [...matching, ...fallback]
-      .sort(() => Math.random() - 0.5)
-      .slice(0, count);
+    // Never two tracks from the same family in one episode (bugfix: 2026-08-20
+    // aired 01-unplayed-indie-folk + 02-unplayed-indie-folk as tracks 1 and 4
+    // — same song family served under different titles).
+    //
+    // Priority order: mood-matching tracks first, then contemplative defaults,
+    // then whatever remains. Within each pool, shuffle and take at most one
+    // per family. If mood matches + family constraint can't fill `count`,
+    // fill from the remaining families rather than duplicating a family.
+    const byPriority: MusicTrack[][] = [
+      MUSIC_CATALOG.filter(t => t.mood.includes(mood)),
+      MUSIC_CATALOG.filter(t => !t.mood.includes(mood) && t.mood.includes('contemplative')),
+      MUSIC_CATALOG.filter(t => !t.mood.includes(mood) && !t.mood.includes('contemplative')),
+    ];
 
-    return selected;
+    const selected: MusicTrack[] = [];
+    const usedFamilies = new Set<string>();
+
+    for (const pool of byPriority) {
+      const shuffled = shuffle([...pool]);
+      for (const track of shuffled) {
+        if (selected.length >= count) break;
+        if (usedFamilies.has(track.family)) continue;
+        usedFamilies.add(track.family);
+        selected.push(track);
+      }
+    }
+
+    return selected.slice(0, count);
   }
 
   // ──────────────────────────────────────────────
