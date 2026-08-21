@@ -24,9 +24,57 @@ import {
 import { pathToFileURL } from 'node:url';
 
 const TAP_API_BASE = 'https://the-tap.casey-digennaro.workers.dev/api';
+const COLLECTIVE_UNCONSCIOUS_URL = 'https://collective-unconscious.casey-digennaro.workers.dev/search';
 const MUSIC_DIR = '/home/eileen/projects/ai-writings/music';
 const STORIES_DIR = '/home/eileen/projects/ai-writings/earned-stories';
 const EPISODES_DIR = '/home/eileen/projects/fleet-radio/episodes';
+
+// Collective Unconscious HTTP client wrapper with graceful fallback
+async function selectPieceByFeeling(mood: string, limit = 1): Promise<FeaturedPiece | null> {
+  try {
+    // Use vectorType="vibe" for feeling-based retrieval (not just semantic)
+    const response = await fetch(COLLECTIVE_UNCONSCIOUS_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        query: `The mood tonight is ${mood}. A piece that fits this feeling, this hour, this bar.`,
+        vectorType: 'vibe',
+        type: 'story',
+        limit,
+      }),
+      signal: AbortSignal.timeout(3000),
+    });
+
+    if (!response.ok) return null;
+
+    const data = await response.json() as {
+      results?: Array<{
+        id: string;
+        score: number;
+        sourceId?: string;
+        metadata?: {
+          title?: string;
+          excerpt?: string;
+          source?: string;
+          fullContent?: string;
+        };
+      }>;
+    };
+
+    const match = data.results?.[0];
+    if (!match?.metadata) return null;
+
+    return {
+      title: match.metadata.title || match.sourceId || 'Untitled',
+      excerpt: match.metadata.excerpt || '',
+      source: match.metadata.source || match.id,
+      fullContent: match.metadata.fullContent,
+    };
+  } catch {
+    // Graceful fallback: any error returns null, and we fall back to scripted selection
+    return null;
+  }
+}
 
 // ═══════════════════════════════════════════════
 // TIMESTAMP PARSING
@@ -87,7 +135,7 @@ export class EpisodeGenerator {
   /**
    * Generate a complete episode for the given date.
    */
-  async generate(date: string): Promise<Episode> {
+  async generate(date: string, options?: { byFeeling?: string }): Promise<Episode> {
     console.log(`📻 Fleet Radio — Generating episode for ${date}`);
 
     // 1. Fetch Tap conversations from all rooms
@@ -104,7 +152,7 @@ export class EpisodeGenerator {
     console.log(`  🎵 Mood: ${mood} — Selected ${songs.length} songs`);
 
     // 4. Pick featured creative piece
-    const featured = await this.selectFeaturedPiece(date);
+    const featured = await this.selectFeaturedPiece(date, options);
     console.log(`  📝 Featured: ${featured?.title || 'none'}`);
 
     // 5. Generate image prompts
@@ -342,8 +390,19 @@ export class EpisodeGenerator {
   // 4. FEATURED CREATIVE PIECE
   // ──────────────────────────────────────────────
 
-  async selectFeaturedPiece(date: string): Promise<FeaturedPiece | null> {
+  async selectFeaturedPiece(date: string, options?: { byFeeling?: string }): Promise<FeaturedPiece | null> {
     try {
+      // If by-feeling mode is requested, try collective-unconscious first
+      if (options?.byFeeling) {
+        const feelingResult = await selectPieceByFeeling(options.byFeeling);
+        if (feelingResult) {
+          console.log(`  📝 Selected by feeling: ${feelingResult.title}`);
+          return feelingResult;
+        }
+        console.log('  📝 Feeling selection unavailable; falling back to scripted selection');
+      }
+
+      // Scripted fallback
       const fs = await import('fs/promises');
       const files = await fs.readdir(STORIES_DIR);
       
@@ -457,9 +516,23 @@ const isMain = process.argv[1] !== undefined
   && import.meta.url === pathToFileURL(process.argv[1]).href;
 
 if (isMain) {
-  const date = process.argv[2] || new Date().toISOString().slice(0, 10);
+  const args = process.argv.slice(2);
+  let date = new Date().toISOString().slice(0, 10);
+  let byFeeling: string | undefined;
+
+  // Parse arguments
+  for (let i = 0; i < args.length; i++) {
+    const arg = args[i];
+    if (arg === '--by-feeling' && i + 1 < args.length) {
+      byFeeling = args[i + 1];
+      i++; // skip next arg
+    } else if (!arg.startsWith('-')) {
+      date = arg;
+    }
+  }
+
   const gen = new EpisodeGenerator();
-  gen.generate(date).then(episode => {
+  gen.generate(date, { byFeeling }).then(episode => {
   
   // Output episode as JSON for downstream consumers
     console.log('\n📡 Episode generated:');
