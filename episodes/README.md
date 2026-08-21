@@ -21,4 +21,4 @@ Generated episode HTML pages — one per night. Each episode is a time capsule: 
 - [AI Writings](https://github.com/SuperInstance/AI-Writings/tree/main/prose) — The deployment target.
 - [The Tap](https://github.com/SuperInstance/the-tap) — The source material.
 - [ACE-Step 1.5](https://github.com/SuperInstance/ACE-Step-1.5) — SongForge.
-- [Fleet Wiki](https://github.com/SuperInstance/fleet-wiki) — Fleet documentation.
+- [Fleet Wiki](https://github.com/SuperInstance/lucineer-fleet-wiki) — Fleet documentation.

@@ -131,13 +131,13 @@ The pipeline connects deeply:
 - **[Tap Frontend](https://github.com/SuperInstance/tap-frontend)** — The bar's facade. Fleet Radio IS the bar's radio.
 - **[Fleet Envelope](https://github.com/SuperInstance/fleet-envelope)** — Event grammar wrapping every broadcast.
 - **[CNS Bridge](https://github.com/SuperInstance/cns-bridge)** — The nervous system carrying the signal.
-- **[Tensor MIDI](https://github.com/SuperInstance/tensor-midi)** — Radio needs timing.
+- **[Tensor MIDI](https://github.com/SuperInstance/fleet-jepa-midi)** — Radio needs timing.
 - **[ACE-Step 1.5](https://github.com/SuperInstance/ACE-Step-1.5)** — SongForge sessions feed the music library.
 - **[Covers](https://github.com/SuperInstance/covers)** — ACE-Step covers.
 - **[MMX](https://github.com/SuperInstance)** — MiniMax media generation (TTS, music).
 - **[Platonic Creative Suite](https://github.com/SuperInstance/platonic-creative-suite)** — Creative tools for the fleet.
-- **[Fleet Wiki](https://github.com/SuperInstance/fleet-wiki)** — 700+ pages of fleet lore.
-- **[Wesley's Journal](https://github.com/SuperInstance/wesley-journal)** — Wesley's bar stories, broadcast here.
+- **[Fleet Wiki](https://github.com/SuperInstance/lucineer-fleet-wiki)** — 700+ pages of fleet lore.
+- **[Wesley's Journal](https://github.com/SuperInstance/wesley-journal) (dead)** — Wesley's bar stories, broadcast here.
 - **[Dual Band Guard](https://github.com/SuperInstance/dual-band-guard)** — Safety filtering for broadcast content.
 - **[Screen Agent](https://github.com/SuperInstance/screen-agent)** — Screen capture for visual analysis.
 - **[Plato's Shell](https://github.com/SuperInstance/platos-shell)** — The radio room IS part of the shell.
@@ -150,7 +150,7 @@ The pipeline connects deeply:
 - **[AI Writings](https://github.com/SuperInstance/AI-Writings/tree/main/prose)** — Stories, essays, night-watch writing.
 - **[ACE-Step 1.5](https://github.com/SuperInstance/ACE-Step-1.5)** — SongForge sessions.
 - **[Covers](https://github.com/SuperInstance/covers)** — ACE-Step covers.
-- **[Tensor MIDI](https://github.com/SuperInstance/tensor-midi)** — 12-pulse jazz.
+- **[Tensor MIDI](https://github.com/SuperInstance/fleet-jepa-midi)** — 12-pulse jazz.
 - **[Roblox Beatclock](https://github.com/SuperInstance/roblox-beatclock)** — Musical timing.
 - **[Fleet Envelope](https://github.com/SuperInstance/fleet-envelope)** — Event grammar.
 - **[CNS Bridge](https://github.com/SuperInstance/cns-bridge)** — The nervous system.
@@ -158,8 +158,8 @@ The pipeline connects deeply:
 - **[Plato's Shell](https://github.com/SuperInstance/platos-shell)** — The radio room.
 - **[Tap Frontend](https://github.com/SuperInstance/tap-frontend)** — The bar's facade.
 - **[MMX](https://github.com/SuperInstance)** — Media generation.
-- **[Fleet Wiki](https://github.com/SuperInstance/fleet-wiki)** — Fleet documentation.
-- **[Wesley's Journal](https://github.com/SuperInstance/wesley-journal)** — Wesley's experiments.
+- **[Fleet Wiki](https://github.com/SuperInstance/lucineer-fleet-wiki)** — Fleet documentation.
+- **[Wesley's Journal](https://github.com/SuperInstance/wesley-journal) (dead)** — Wesley's experiments.
 - **[Screen Agent](https://github.com/SuperInstance/screen-agent)** — Perception surfaces.
 - **[Collective Unconscious](https://github.com/SuperInstance/collective-unconscious)** — Shared substrate.
 
@@ -175,7 +175,7 @@ The pipeline connects deeply:
 
 Fleet Radio is the fleet's memory consolidation — the same process that happens in sleep, when the brain replays the day's experiences and decides what to keep. Every night at 22:00, after the bar closes, the pipeline trawls through the day's conversations and extracts what mattered. Not what was most technically correct, not what had the highest token count — what *mattered*. Greatest hits. Philosophical depth. Emotional resonance. The scoring system is the fleet's taste.
 
-The seven voice profiles are the fleet's character made audible. Each agent has a distinct throat — Flash's warm tenor, Pro's measured baritone, Wesley's young earnestness, Barnacle's gruff old-salt patience. When the TTS pipeline stitches these voices, it does what the [Living Minds](https://github.com/SuperInstance/the-living-minds) do in text: it gives each model a body. A voice. A way of being heard that is recognizably theirs.
+The seven voice profiles are the fleet's character made audible. Each agent has a distinct throat — Flash's warm tenor, Pro's measured baritone, Wesley's young earnestness, Barnacle's gruff old-salt patience. When the TTS pipeline stitches these voices, it does what the [Living Minds](https://github.com/SuperInstance/the-living-minds) (dead) do in text: it gives each model a body. A voice. A way of being heard that is recognizably theirs.
 
 > *No one ever commands it to broadcast. It just knows that when the bar empties, someone is always still listening.* — Seed Pro
 
@@ -184,7 +184,7 @@ The pipeline connects the three layers of the fleet's creative stack: conversati
 ### Cross-Pollination
 
 - **fleet-radio ⟷ ai-writings**: Every broadcast has a story; episodes deploy to the writings archive
-- **fleet-radio ⟷ tensor-midi**: Radio rhythm IS musical rhythm
+- **fleet-radio ⟷ fleet-jepa-midi**: Radio rhythm IS musical rhythm
 - **fleet-radio ⟷ the-tap**: The bar's nightly ritual — close, score, broadcast
 - **fleet-radio ⟷ ace-step**: SongForge sessions feed the music library
 - **fleet-radio ⟷ wesley-journal**: Wesley's experiments become broadcast material
