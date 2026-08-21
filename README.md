@@ -1,5 +1,9 @@
 # ⚓ Fleet Radio
 
+<p align="center">
+  <img src="assets/hero.jpg" alt="Fleet Radio — the afterhours broadcast of the SuperInstance fleet" width="640">
+</p>
+
 **Daily automated podcast generated from The Tap's conversations.**
 
 Fleet Radio is the afterhours broadcast of the SuperInstance fleet. Every night at 22:00 AKDT, after The Tap closes, the pipeline:
