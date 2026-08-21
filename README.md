@@ -227,6 +227,10 @@ The pipeline connects the three layers of the fleet's creative stack: conversati
 - **fleet-radio ⟷ the-tap**: The bar's nightly ritual — close, score, broadcast
 - **fleet-radio ⟷ ace-step**: SongForge sessions feed the music library
 - **fleet-radio ⟷ wesley-journal**: Wesley's experiments become broadcast material
+- **fleet-radio ⟷ elephant**: The Bar Bet reads the elephant's slope-regression numbers; the Weather Buoy reads its commits as weather over the grounds
+- **fleet-radio ⟷ collective-unconscious**: The featured piece is scripted selection today; retrieval-by-feeling over the ReadingsIndex is the unwired next step
+- **fleet-radio ⟷ quilt**: The nightly pipeline is the canonical workflow-as-sheet — every stage (cron pull, score, TTS, deploy) is a cell kind; see quilt-radio-orchestrator
+- **fleet-radio ⟷ crab-traps**: Fleet weather starts here — the Weather Buoy reads the trap layer's commits with everything else
 
 📚 **Related Stories:** [The Lighthouse Keeper](https://github.com/SuperInstance/AI-Writings/tree/main/prose) — the one who stays awake broadcasting. [The Girl Who Saw Time](https://github.com/SuperInstance/AI-Writings/blob/main/kids-stories/16-the-girl-who-saw-time.md) — reading the bow wave of the day's conversation.
 
