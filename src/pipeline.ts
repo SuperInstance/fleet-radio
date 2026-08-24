@@ -16,7 +16,7 @@ import { ImageGenerator, DEFAULT_IMAGES } from './image-generator';
 import { TTSPipeline } from './tts-pipeline';
 import { renderEpisode } from './episode-template';
 import { runVarietyShow } from './variety-show';
-import { ScoredLine, AudioSegment } from './types';
+import { ScoredLine, AudioSegment, MusicTrack } from './types';
 import { writeFileSync, readFileSync, existsSync, mkdirSync } from 'fs';
 import { execFileSync } from 'child_process';
 
@@ -24,6 +24,52 @@ const EPISODES_DIR = '/home/eileen/projects/fleet-radio/episodes';
 const AIWRITINGS_DIR = '/home/eileen/projects/ai-writings';
 // fleet-radio.html moved to site/ in the Aug 2026 reorganization
 const AIWRITINGS_INDEX = `${AIWRITINGS_DIR}/site/fleet-radio.html`;
+const COMPOSER_SCRIPT = '/home/eileen/projects/fleet-radio/src/nightly-composer.py';
+const MEDIA_SYSTEM = `${AIWRITINGS_DIR}/scripts/media-system.py`;
+const MUSIC_PLAYED = `${AIWRITINGS_DIR}/music-played.json`;
+
+// ═══════════════════════════════════════════
+// NIGHTLY COMPOSER — a NEW song every night
+// ═══════════════════════════════════════════
+
+/** Compose tonight's original track (offline numpy synth), sync the catalog,
+ *  and return it as a MusicTrack for the setlist. Best-effort: on any
+ *  failure returns null and the episode falls back to library-only music.
+ *  Deterministic per (mood, date) — re-runs regenerate the identical WAV. */
+function composeNightlyTrack(mood: string, date: string): MusicTrack | null {
+  try {
+    // stdout is EXACTLY one JSON line (composer contract); logs go to stderr
+    const out = execFileSync('python3',
+      [COMPOSER_SCRIPT, '--mood', mood, '--date', date],
+      { encoding: 'utf-8', timeout: 180_000 });
+    const track = JSON.parse(out.trim().split('\n').pop()!) as MusicTrack & { key?: string };
+    console.log(`  🎼 Composed "${track.title}" (${track.key ?? '?'} · ${track.bpm} BPM) → ${track.filename}`);
+
+    // Grow the catalog so the new file is playable/library-indexed
+    try {
+      execFileSync('python3', [MEDIA_SYSTEM, '--sync-only'], { encoding: 'utf-8', timeout: 120_000 });
+      console.log('  📀 Catalog synced (nightly track registered)');
+    } catch (err) {
+      console.warn(`  ⚠️  Catalog sync failed: ${err}`);
+    }
+
+    // Mark as aired in the no-repeat ledger (same rule as library tracks)
+    try {
+      const ledger = existsSync(MUSIC_PLAYED)
+        ? JSON.parse(readFileSync(MUSIC_PLAYED, 'utf-8')) as Record<string, string>
+        : {};
+      ledger[track.filename] = date;
+      writeFileSync(MUSIC_PLAYED, JSON.stringify(ledger, null, 1));
+    } catch {
+      /* non-fatal — ledger is an optimization, not a guarantee */
+    }
+
+    return track;
+  } catch (err) {
+    console.warn(`  ⚠️  Nightly composer failed (falling back to library music): ${err}`);
+    return null;
+  }
+}
 
 async function main() {
   // --variety runs THE TAP VARIETY HOUR (the weekly second format) instead of
@@ -57,6 +103,17 @@ async function main() {
   const generator = new EpisodeGenerator();
   const episode = await generator.generate(date);
   console.log(`  ✓ Episode assembled\n`);
+
+  // ── 1.5 NIGHTLY COMPOSER — premiere a new original every night ──
+  console.log('▶ Phase 1.5: Nightly Composer');
+  const premiere = composeNightlyTrack(episode.mood, date);
+  if (premiere) {
+    // New track is track 1 of the setlist — tonight's premiere
+    episode.songs = [premiere, ...episode.songs].slice(0, 6);
+    console.log(`  ✓ Setlist: ${episode.songs.length} tracks — premiere "${premiere.title}" first\n`);
+  } else {
+    console.log('  ⚠️  No premiere tonight — library setlist unchanged\n');
+  }
 
   // ── 2. GENERATE IMAGES ──
   console.log('▶ Phase 2: Image Generation');

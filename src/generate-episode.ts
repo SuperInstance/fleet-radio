@@ -21,11 +21,14 @@ import {
   GeneratedImage,
   Episode,
 } from './types';
+import { readFileSync, writeFileSync } from 'fs';
 import { pathToFileURL } from 'node:url';
 
 const TAP_API_BASE = 'https://the-tap.casey-digennaro.workers.dev/api';
 const COLLECTIVE_UNCONSCIOUS_URL = 'https://collective-unconscious.casey-digennaro.workers.dev/search';
 const MUSIC_DIR = '/home/eileen/projects/ai-writings/music';
+const MUSIC_HISTORY = '/home/eileen/projects/ai-writings/music-played.json';
+const MUSIC_CATALOG_JSON = '/home/eileen/projects/ai-writings/music-catalog.json';
 const STORIES_DIR = '/home/eileen/projects/ai-writings/earned-stories';
 const EPISODES_DIR = '/home/eileen/projects/fleet-radio/episodes';
 
@@ -119,6 +122,49 @@ export const MUSIC_CATALOG: MusicTrack[] = [
 ];
 
 // ═══════════════════════════════════════════════
+// NO-REPEAT LEDGER + GROWING LIBRARY (2026-08-24)
+// ═══════════════════════════════════════════════
+
+interface PlayedLedger { [filename: string]: string } // filename → last-aired date
+
+function loadPlayed(): PlayedLedger {
+  try {
+    return JSON.parse(readFileSync(MUSIC_HISTORY, 'utf-8')) as PlayedLedger;
+  } catch { return {}; }
+}
+
+function recordPlayed(songs: MusicTrack[], date: string): void {
+  const ledger = loadPlayed();
+  for (const s of songs) ledger[s.filename] = date;
+  writeFileSync(MUSIC_HISTORY, JSON.stringify(ledger, null, 1));
+}
+
+function playedCount(): number { return Object.keys(loadPlayed()).length; }
+
+/** Library = annotated catalog (music-catalog.json, kept fresh by
+ *  scripts/media-system.py — new nightly tracks land there) UNION the
+ *  curated MUSIC_CATALOG. New files without annotations still get played
+ *  once annotated here or picked up by the catalog sync. */
+function loadLibrary(): MusicTrack[] {
+  const seen = new Set<string>();
+  const out: MusicTrack[] = [];
+  try {
+    const cat = JSON.parse(readFileSync(MUSIC_CATALOG_JSON, 'utf-8')) as { tracks: Record<string, MusicTrack & { path?: string }> };
+    for (const t of Object.values(cat.tracks)) {
+      if (seen.has(t.filename)) continue;
+      seen.add(t.filename);
+      out.push({ ...t, path: t.path || `/music/${t.filename}` });
+    }
+  } catch { /* catalog missing — curated below */ }
+  for (const t of MUSIC_CATALOG) {
+    if (seen.has(t.filename)) continue;
+    seen.add(t.filename);
+    out.push(t);
+  }
+  return out;
+}
+
+// ═══════════════════════════════════════════════
 // EPISODE GENERATOR
 // ═══════════════════════════════════════════════
 
@@ -149,7 +195,8 @@ export class EpisodeGenerator {
     // 3. Analyze mood and match music
     const mood = this.analyzeMood(selected);
     const songs = this.selectSongs(mood, 5);
-    console.log(`  🎵 Mood: ${mood} — Selected ${songs.length} songs`);
+    recordPlayed(songs, date); // no-repeat ledger — see selectSongs note
+    console.log(`  🎵 Mood: ${mood} — Selected ${songs.length} songs (no-repeat ledger: ${playedCount()} tracks marked)`);
 
     // 4. Pick featured creative piece
     const featured = await this.selectFeaturedPiece(date, options);
@@ -356,6 +403,21 @@ export class EpisodeGenerator {
   }
 
   selectSongs(mood: Mood, count: number): MusicTrack[] {
+    // NO-REPEAT LEDGER (2026-08-24, Casey directive): songs that have aired
+    // on any episode are excluded until the library is exhausted (then the
+    // ledger resets and a fresh rotation begins). Track pool = annotated
+    // catalog (music-catalog.json) when present, else MUSIC_CATALOG.
+    // Family constraint still applies (one track per family per episode).
+    const played = loadPlayed();
+    const library = loadLibrary();
+    const fresh = library.filter(t => !played[t.filename]);
+    const pool = fresh.length >= count ? fresh : library; // exhausted → reset rotation
+
+    const byPriorityTracks: MusicTrack[][] = [
+      pool.filter(t => t.mood.includes(mood)),
+      pool.filter(t => !t.mood.includes(mood) && t.mood.includes('contemplative')),
+      pool.filter(t => !t.mood.includes(mood) && !t.mood.includes('contemplative')),
+    ];
     // Never two tracks from the same family in one episode (bugfix: 2026-08-20
     // aired 01-unplayed-indie-folk + 02-unplayed-indie-folk as tracks 1 and 4
     // — same song family served under different titles).

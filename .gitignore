@@ -6,3 +6,4 @@ episodes/images/
 *.mp3
 !/music/*.mp3
 /tmp/
+__pycache__/
