@@ -22,11 +22,15 @@ import { execFileSync } from 'child_process';
 
 const EPISODES_DIR = '/home/eileen/projects/fleet-radio/episodes';
 const AIWRITINGS_DIR = '/home/eileen/projects/ai-writings';
-// fleet-radio.html moved to site/ in the Aug 2026 reorganization
-const AIWRITINGS_INDEX = `${AIWRITINGS_DIR}/site/fleet-radio.html`;
+// fleet-radio.html moved to site/ in the Aug 2026 reorganization and was
+// renamed radio.html there — point at the live index (has the footer anchor
+// the archive insert needs; the subtitle replace no-ops safely).
+const AIWRITINGS_INDEX = `${AIWRITINGS_DIR}/site/radio.html`;
 const COMPOSER_SCRIPT = '/home/eileen/projects/fleet-radio/src/nightly-composer.py';
 const MEDIA_SYSTEM = `${AIWRITINGS_DIR}/scripts/media-system.py`;
+const WAV_TO_MP3 = `${AIWRITINGS_DIR}/scripts/wav-to-mp3.py`;
 const MUSIC_PLAYED = `${AIWRITINGS_DIR}/music-played.json`;
+const MUSIC_CATALOG = `${AIWRITINGS_DIR}/music-catalog.json`;
 
 // ═══════════════════════════════════════════
 // NIGHTLY COMPOSER — a NEW song every night
@@ -36,24 +40,95 @@ const MUSIC_PLAYED = `${AIWRITINGS_DIR}/music-played.json`;
  *  and return it as a MusicTrack for the setlist. Best-effort: on any
  *  failure returns null and the episode falls back to library-only music.
  *  Deterministic per (mood, date) — re-runs regenerate the identical WAV. */
+/** The composer registers its WAV in music-catalog.json (the episode setlist
+ *  source). Repoint that entry .wav→.mp3 once the mp3 exists — same key AND
+ *  same fields — so future setlists stream the mp3 and the file never gets
+ *  double-registered under both extensions. */
+function repointCatalogToMp3(wavName: string): string | null {
+  const mp3Name = wavName.replace(/\.wav$/, '.mp3');
+  try {
+    const cat = JSON.parse(readFileSync(MUSIC_CATALOG, 'utf-8')) as {
+      tracks: Record<string, Record<string, unknown> & { path?: string; filename?: string }>;
+    };
+    const entry = cat.tracks[wavName];
+    if (!entry) return null;
+    entry.filename = mp3Name;
+    if (entry.path?.endsWith('.wav')) entry.path = entry.path.replace(/\.wav$/, '.mp3');
+    delete cat.tracks[wavName];
+    // if a stale sync already added a generic mp3-keyed dup, this entry wins
+    cat.tracks[mp3Name] = entry;
+    writeFileSync(MUSIC_CATALOG, JSON.stringify(cat, null, 1));
+    return mp3Name;
+  } catch (err) {
+    console.warn(`  ⚠️  Catalog repoint failed: ${err}`);
+    return null;
+  }
+}
+
 function composeNightlyTrack(mood: string, date: string): MusicTrack | null {
   try {
     // stdout is EXACTLY one JSON line (composer contract); logs go to stderr
     const out = execFileSync('python3',
       [COMPOSER_SCRIPT, '--mood', mood, '--date', date],
       { encoding: 'utf-8', timeout: 180_000 });
-    const track = JSON.parse(out.trim().split('\n').pop()!) as MusicTrack & { key?: string };
+    let track = JSON.parse(out.trim().split('\n').pop()!) as MusicTrack & {
+      key?: string; wav_path?: string; duration_seconds?: number;
+    };
     console.log(`  🎼 Composed "${track.title}" (${track.key ?? '?'} · ${track.bpm} BPM) → ${track.filename}`);
 
-    // Grow the catalog so the new file is playable/library-indexed
+    // Encode the fresh WAV to streaming MP3 (per-file contract: the site
+    // streams mp3; the composer writes a ~10MB 44.1kHz WAV).
+    const wavPath = track.wav_path ?? `${AIWRITINGS_DIR}/music/${track.filename}`;
     try {
-      execFileSync('python3', [MEDIA_SYSTEM, '--sync-only'], { encoding: 'utf-8', timeout: 120_000 });
-      console.log('  📀 Catalog synced (nightly track registered)');
+      execFileSync('python3', [WAV_TO_MP3, wavPath], { encoding: 'utf-8', timeout: 300_000 });
+      console.log('  🎧 MP3 encoded');
     } catch (err) {
-      console.warn(`  ⚠️  Catalog sync failed: ${err}`);
+      console.warn(`  ⚠️  WAV→MP3 conversion failed: ${err}`);
     }
 
-    // Mark as aired in the no-repeat ledger (same rule as library tracks)
+    // Keep music-catalog.json (episode setlist source) pointing at the mp3
+    const mp3Name = repointCatalogToMp3(track.filename);
+
+    // The episode setlist streams audio/mpeg — link the mp3, not the wav.
+    if (track.filename.endsWith('.wav')) {
+      if (mp3Name && existsSync(`${AIWRITINGS_DIR}/music/${mp3Name}`)) {
+        track = {
+          ...track,
+          filename: mp3Name,
+          path: (track.path ?? `/music/${track.filename}`).replace(/\.wav$/, '.mp3'),
+        };
+      } else {
+        console.warn(`  ⚠️  ${track.filename.replace(/\.wav$/, '.mp3')} missing — setlist links the WAV fallback`);
+      }
+    }
+
+    // Register in the library page's embedded catalog (media-system owns it).
+    // `add` appends blindly, so guard with `list` for idempotent re-runs.
+    // NOTE: cmd_add passes "/"-prefixed paths through verbatim — always give
+    // it the SITE-RELATIVE path (/music/<file>.mp3), never an absolute one.
+    try {
+      const listed = execFileSync('python3', [MEDIA_SYSTEM, 'list'], { encoding: 'utf-8', timeout: 60_000 });
+      if (mp3Name && !listed.includes(mp3Name)) {
+        execFileSync('python3', [
+          MEDIA_SYSTEM, 'add',
+          `/music/${mp3Name}`,
+          track.title,
+          '--desc', track.description ?? '',
+          '--bpm', String(track.bpm ?? ''),
+          '--mood', (track.mood ?? []).join(','),
+          '--family', track.family ?? `nightly-${date}`,
+        ], { encoding: 'utf-8', timeout: 60_000 });
+        console.log(`  📀 Library page grew: ${mp3Name} registered`);
+      } else {
+        console.log('  📀 Library page already has tonight’s track');
+      }
+    } catch (err) {
+      console.warn(`  ⚠️  Library registration failed: ${err}`);
+    }
+
+    // Mark as aired in the no-repeat ledger — AFTER the mp3 repoint, so the
+    // key matches the catalog filename and a re-air can't slip through as an
+    // “unplayed” mp3 twin of an aired wav.
     try {
       const ledger = existsSync(MUSIC_PLAYED)
         ? JSON.parse(readFileSync(MUSIC_PLAYED, 'utf-8')) as Record<string, string>
@@ -89,13 +164,21 @@ async function main() {
     return;
   }
 
-  const date = process.argv[2] || new Date().toLocaleDateString('en-CA', { 
-    timeZone: 'America/Anchorage' 
-  });
-  
+  // Test/dry-run labels may carry a suffix (e.g. 2026-08-24-dryrun).
+  // Everything date-mathematical — the Tap fetch window, the composer seed,
+  // the played-ledger — uses the ISO prefix; only output filenames and the
+  // banner keep the full label, so test runs never collide with the real
+  // episode and are trivially identifiable for cleanup.
+  const rawDate = process.argv[2] && !process.argv[2].startsWith('--')
+    ? process.argv[2]
+    : new Date().toLocaleDateString('en-CA', { timeZone: 'America/Anchorage' });
+  const date = rawDate.match(/^\d{4}-\d{2}-\d{2}/)?.[0] ?? rawDate;
+  const isTestRun = rawDate !== date;
+
   console.log(`╔══════════════════════════════════════════╗`);
   console.log(`║  ⚓ FLEET RADIO — Pipeline Runner         ║`);
-  console.log(`║  Episode: ${date}                   ║`);
+  console.log(`║  Episode: ${rawDate}                   ║`);
+  if (isTestRun) console.log(`║  (test run — deploy + index update OFF)   ║`);
   console.log(`╚══════════════════════════════════════════╝\n`);
 
   // ── 1. GENERATE EPISODE ──
@@ -159,12 +242,12 @@ async function main() {
   if (!existsSync(EPISODES_DIR)) {
     mkdirSync(EPISODES_DIR, { recursive: true });
   }
-  const episodePath = `${EPISODES_DIR}/${date}.html`;
+  const episodePath = `${EPISODES_DIR}/${rawDate}.html`;
   writeFileSync(episodePath, html);
   console.log(`  ✓ Episode saved: ${episodePath}`);
 
   // Copy to ai-writings for deployment
-  const deployPath = `${AIWRITINGS_DIR}/fleet-radio/${date}.html`;
+  const deployPath = `${AIWRITINGS_DIR}/fleet-radio/${rawDate}.html`;
   if (existsSync(`${AIWRITINGS_DIR}/fleet-radio`)) {
     writeFileSync(deployPath, html);
     console.log(`  ✓ Copied to ai-writings: ${deployPath}`);
@@ -173,11 +256,20 @@ async function main() {
 
   // ── 5. UPDATE INDEX ──
   console.log('▶ Phase 5: Update Index');
-  await updateIndex(episode.date);
+  if (isTestRun) {
+    console.log('  ⏭  Skipped — test run (index keeps the real episode archive)');
+  } else {
+    await updateIndex(episode.date);
+  }
   console.log('');
 
   // ── 6. DEPLOY ──
+  // FLEET_DEPLOY=0 (or a suffixed test-run date) suppresses the Pages deploy
+  // so dry-runs render + register music without touching production.
   console.log('▶ Phase 6: Deploy');
+  if (isTestRun || process.env.FLEET_DEPLOY === '0') {
+    console.log('  ⏭  Skipped — deploy disabled (test run / FLEET_DEPLOY=0)');
+  } else {
   try {
     // Deploy ai-writings to Pages (list-form args — no shell, per fleet critical path rule)
     // The tree is ~11k files / ~2.7GB, so upload needs a generous timeout.
@@ -192,11 +284,12 @@ async function main() {
     console.warn(`  ⚠️  Deploy failed: ${err}`);
     console.warn('  Episode is saved locally — deploy manually if needed.');
   }
+  }
 
   console.log(`\n╔══════════════════════════════════════════╗`);
   console.log(`║  ⚓ FLEET RADIO — Complete!                ║`);
   console.log(`║  Episode: https://ai-writings.pages.dev/  ║`);
-  console.log(`║           fleet-radio/${date}.html        ║`);
+  console.log(`║           fleet-radio/${rawDate}.html        ║`);
   console.log(`╚══════════════════════════════════════════╝`);
 }
 
