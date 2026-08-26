@@ -161,10 +161,16 @@ export class TTSPipeline {
   // ──────────────────────────────────────────────
 
   private isMmxAvailable(): boolean {
+    // MMX FROZEN by captain's order 2026-08-26 11:47 AKDT — "don't use mmx
+    // until further notice." Set MMX_ENABLED=1 to re-arm when the freeze lifts.
+    if (process.env.MMX_ENABLED === '1') return this.checkMmxBinary();
+    return false;
+  }
+
+  private checkMmxBinary(): boolean {
     if (this.mmxAvailable !== null) return this.mmxAvailable;
     try {
-      // List-form args — no shell. (Previously an unimported execSync call:
-      // latent ReferenceError made MMX silently unavailable on every run.)
+      // (Previously an unimported execSync call: a latent ReferenceError made MMX silently unavailable on every run.)
       execFileSync('which', ['mmx'], { stdio: 'pipe' });
       this.mmxAvailable = true;
     } catch {
