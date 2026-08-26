@@ -185,8 +185,8 @@ export class TTSPipeline {
       
       execFileSync(
         'mmx',
-        ['speech', 'synthesize', '--text', text, '--voice', voiceParams, '--output', outputPath],
-        { stdio: 'pipe', timeout: 30000 }
+        ['speech', 'synthesize', '--text', text, '--voice', voiceParams, '--out', outputPath],
+        { stdio: 'pipe', timeout: 60000 }
       );
       
       if (existsSync(outputPath)) {
@@ -274,16 +274,19 @@ export class TTSPipeline {
 
   private getMmxVoiceParams(voiceId: string): string {
     // Map our voice IDs to MMX voice parameters
+    // Real MMX voice IDs (verified via `mmx speech voices` 2026-08-26).
+    // The old IDs (male_warm etc.) never existed — "voice id not exist" on
+    // every nightly run since 2026-08-20. These are the actual system voices.
     const voiceMap: Record<string, string> = {
-      male_tenor_warm: 'male_warm',
-      male_baritone_measured: 'male_deep',
-      young_earnest: 'male_young',
-      mysterious_slow: 'male_calm',
-      calm_female_oceanic: 'female_calm',
-      gruff_old_male: 'male_old',
-      steady_narrator: 'narrator',
+      male_tenor_warm: 'English_magnetic_voiced_man',      // Flash
+      male_baritone_measured: 'English_ManWithDeepVoice',   // Pro
+      young_earnest: 'English_DecentYoungMan',              // Wesley
+      mysterious_slow: 'English_CaptivatingStoryteller',    // Scribe
+      calm_female_oceanic: 'English_SereneWoman',           // Hermes
+      gruff_old_male: 'English_MaturePartner',              // Barnacle
+      steady_narrator: 'English_expressive_narrator',       // Lucineer
     };
-    return voiceMap[voiceId] || 'narrator';
+    return voiceMap[voiceId] || 'English_expressive_narrator';
   }
 
   private getAudioDuration(filepath: string): number {
