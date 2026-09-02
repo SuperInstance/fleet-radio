@@ -236,7 +236,7 @@ async function main() {
 
   // ── 4. RENDER HTML ──
   console.log('▶ Phase 4: Render HTML');
-  const html = renderEpisode(episode, images);
+  const html = renderEpisode(episode, images, audioSegments);
   
   // Save to episodes directory
   if (!existsSync(EPISODES_DIR)) {

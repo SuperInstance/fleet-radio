@@ -73,6 +73,16 @@ export class TTSPipeline {
     // Clean text for TTS — remove markdown, stage directions
     const cleanText = this.cleanText(text);
 
+    // Stage-direction-only lines (the drifters' "...") clean to empty —
+    // skip TTS gracefully instead of 400ing the endpoint (2026-09-02 audit).
+    if (!cleanText) {
+      console.warn(`  ⚠️  Seg ${segmentNum} (${speaker}): nothing speakable after cleaning — text-only`);
+      return {
+        speaker: voice.displayName,
+        text: '',
+      };
+    }
+
     // Try MMX first
     if (this.isMmxAvailable()) {
       const success = await this.generateWithMMX(cleanText, voice, filepath);

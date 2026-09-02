@@ -3,7 +3,7 @@
 
 import { Episode, ScoredLine, MusicTrack, FeaturedPiece } from './types';
 
-export function renderEpisode(episode: Episode, images: { filename: string; caption: string }[]): string {
+export function renderEpisode(episode: Episode, images: { filename: string; caption: string }[], segments?: { speaker: string; text: string; audioFile: string | null }[]): string {
   const date = episode.date;
   const prevDate = new Date(date + 'T00:00:00');
   prevDate.setDate(prevDate.getDate() - 1);
@@ -166,6 +166,20 @@ ${episode.featured ? `
       ${escapeHTML(episode.featured.excerpt).replace(/\n/g, '<br>')}
     </div>
   </div>
+</div>
+` : ''}
+
+${segments && segments.some(s => s.audioFile) ? `
+<!-- Voice Segments (TTS) -->
+<div class="section">
+  <h2>🎙️ Voice Segments</h2>
+  <p style="color:#999;font-size:0.9em">The bar, in its own voice. Served through the fleet TTS bridge.</p>
+  ${segments.filter(s => s.audioFile).map(s => `
+  <div class="track">
+    <div class="track-title">${escapeHTML(s.speaker)}</div>
+    <div class="track-desc">${escapeHTML(s.text).slice(0, 220)}</div>
+    <audio controls preload="none"><source src="/fleet-radio/audio/${escapeHTML(s.audioFile!)}" type="audio/mpeg"></audio>
+  </div>`).join('\n')}
 </div>
 ` : ''}
 
