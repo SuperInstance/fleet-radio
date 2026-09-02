@@ -37,6 +37,20 @@ const VOICE_MAP: VoiceProfile[] = [
   { speakerId: 'lucineer', displayName: 'Lucineer', voiceId: 'steady_narrator', description: 'Steady narrator voice', cssClass: 'lucineer' },
 ];
 
+// Aura (@cf/deepgram/aura-1) voice cast — MMX voiceIds don't transfer.
+const AURA_CAST: Record<string, string> = {
+  flash: 'orion',        // energetic male tenor
+  pro: 'perseus',        // measured male baritone
+  wesley: 'arcas',       // younger, earnest
+  scribe: 'orpheus',     // deep narrative
+  hermes: 'luna',        // calm female
+  'npc-barnacle': 'angus', // gruff old male
+  lucineer: 'asteria',   // clear narrator
+};
+function auraVoiceFor(speakerId: string): string {
+  return AURA_CAST[speakerId] || 'asteria';
+}
+
 export class TTSPipeline {
   private outputDir: string;
   private mmxAvailable: boolean | null = null;
@@ -211,37 +225,39 @@ export class TTSPipeline {
     outputPath: string
   ): Promise<boolean> {
     try {
-      // Cloudflare Workers AI TTS via wrangler
-      // Using @cf/myshell-ai/mptts or similar model
-      // For now, we'll use the Workers AI API directly
-      
-      const prompt = `${voice.description}. Speaking: "${text.slice(0, 500)}"`;
-      
-      // Use wrangler to call Workers AI
-      // This is a simplified version — in production, deploy a dedicated Worker
-      const { writeFileSync, readFileSync, unlinkSync } = await import('fs');
-      const scriptPath = `/tmp/fleet-radio-tts-${Date.now()}.js`;
-      
-      writeFileSync(scriptPath, `
-        export default {
-          async fetch(request, env) {
-            const resp = await env.AI.run('@cf/myshell-ai/mptts', {
-              text: ${JSON.stringify(text.slice(0, 1000))},
-              voice: ${JSON.stringify(voice.voiceId)},
-            });
-            return new Response(resp.audio, {
-              headers: { 'Content-Type': 'audio/mpeg' }
-            });
-          }
-        };
-      `);
+      // Real implementation (2026-09-02): fleet-static-host exposes POST /ai/tts
+      // running @cf/deepgram/aura-1 through its Workers AI binding — the local
+      // wrangler OAuth token has read-only scopes and cannot call Workers AI
+      // REST directly. Endpoint override via FLEET_TTS_ENDPOINT.
+      const endpoint =
+        process.env.FLEET_TTS_ENDPOINT ||
+        'https://fleet-static-host.casey-digennaro.workers.dev/ai/tts';
+      const { writeFileSync } = await import('fs');
 
-      // For now, we mark as unavailable if MMX fails — CF Workers AI TTS 
-      // requires a deployed Worker endpoint. This is a placeholder for when
-      // that infrastructure is set up.
-      unlinkSync(scriptPath);
-      return false;
-    } catch {
+      const res = await fetch(endpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          text: text.slice(0, 1200),
+          voice: auraVoiceFor(voice.speakerId),
+        }),
+        signal: AbortSignal.timeout(30_000),
+      });
+
+      if (!res.ok) {
+        const detail = await res.text().catch(() => '');
+        console.warn(`  ⚠️  CF TTS endpoint ${res.status}: ${detail.slice(0, 120)}`);
+        return false;
+      }
+      const buf = Buffer.from(await res.arrayBuffer());
+      if (buf.length < 1000) {
+        console.warn(`  ⚠️  CF TTS suspiciously small payload (${buf.length} bytes)`);
+        return false;
+      }
+      writeFileSync(outputPath, buf);
+      return true;
+    } catch (e: any) {
+      console.warn(`  ⚠️  CF TTS failed: ${e?.message ?? e}`);
       return false;
     }
   }
