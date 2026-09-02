@@ -80,6 +80,8 @@ export class TTSPipeline {
       return {
         speaker: voice.displayName,
         text: '',
+        audioFile: null,
+        duration: 0,
       };
     }
 
